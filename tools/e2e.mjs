@@ -54,6 +54,10 @@ const snapshot = async () => {
     tableTotal: document.querySelector('.table__more')?.textContent ?? '',
     status: document.querySelector('.status__text')?.textContent ?? '',
     chartErrors: [...document.querySelectorAll('.chart__error')].map(el => el.textContent),
+    // What the view shows instead of a dashboard when a message will not
+    // apply. This is where "surface not found" surfaces — it is caught and
+    // rendered, never thrown, so watching the console alone would miss it.
+    notice: document.querySelector('.shell__notice--error')?.textContent ?? '',
   }));
 };
 
@@ -120,6 +124,32 @@ const withWidget = await run('heatmap', 5000);
 check('a saved widget joins the dashboard', withWidget.sections.includes('When people buy'), withWidget.sections.join(', '));
 check('the saved widget draws', withWidget.charts > rendered.charts, `${withWidget.charts} charts`);
 check('re-rendering an existing surface is not an error', withWidget.chartErrors.length === 0);
+
+// 6. The same recompose, delivered to a view that has never seen the surface.
+//
+// A host may open a fresh view for each tool result rather than routing it to
+// the running one. When it does, an update carrying only `updateComponents` has
+// nothing to update, and A2UI rejects it with "dashboard surface not found" — a
+// blank panel where the user asked for a change. An update has to be renderable
+// from nothing, so this asserts the whole dashboard comes back, not just the
+// one component that changed.
+const freshView = await run('update-fresh-view', 6500);
+const freshToday = freshView.kpis.find(kpi => kpi.label === 'Sold today');
+check('an update into a fresh view still renders', freshView.charts >= 4, `${freshView.charts} charts`);
+check(
+  'a fresh view is given the whole dashboard, not one component',
+  freshView.sections.length >= 2,
+  freshView.sections.join(', '),
+);
+check('the change itself survives into the fresh view', freshToday?.accent === '#16a34a', freshToday?.accent);
+check('the fresh view loads its own rows', /\d/.test(freshView.status), freshView.status);
+check('no chart failed to draw in the fresh view', freshView.chartErrors.length === 0, freshView.chartErrors.join('; '));
+check('the fresh view shows no error notice', freshView.notice === '', freshView.notice);
+check(
+  'no "surface not found" anywhere in the run',
+  !/surface not found/i.test(freshView.notice) && !consoleErrors.some(text => /surface not found/i.test(text)),
+  freshView.notice || (consoleErrors.find(text => /surface not found/i.test(text)) ?? ''),
+);
 
 check('no unexpected console errors', consoleErrors.length === 0, consoleErrors.slice(0, 3).join(' | '));
 

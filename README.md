@@ -70,7 +70,7 @@ server ──────────────┘  "ticket_sales moved"      
                                                                re-renders
 ```
 
-Three decisions do most of the work:
+Four decisions do most of the work:
 
 **Rows never travel through the model.** `render_dashboard` returns a layout and
 a row count. The view fetches rows itself with `get_dataset_rows`, a tool whose
@@ -80,6 +80,16 @@ Twelve thousand orders belong in a chart, not in a context window.
 **A dashboard is components, not an image.** Changing one chart is one
 `update_dashboard` naming one id. The user's filters, sort order and scroll
 position survive, because nothing else was touched.
+
+**An update must render in a view that has never seen the dashboard.** A host is
+free to open a fresh view per tool result rather than routing it into the
+running one, and a payload of pure `updateComponents` has nothing to update
+there — A2UI rejects it with *surface not found*, and the user gets a blank
+panel where they asked for a change. So the server remembers the composed tree,
+and every update travels in two forms: `_meta['a2ui/messages']` rebuilds the
+whole surface from nothing, `_meta['a2ui/patch']` carries only the delta. The
+view applies whichever fits what it already holds, so the server never has to
+guess which view it is talking to.
 
 **The server says when, the host still carries what.** MCP has no server→view
 channel, so the view holds open a change stream straight to the Worker — the one

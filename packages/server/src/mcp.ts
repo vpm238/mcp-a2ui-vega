@@ -26,12 +26,15 @@ import {
 import catalogDocument from '@mcp-a2ui-vega/catalog/catalog.json';
 import appHtml from './generated/app.html';
 import type { Env } from './env.ts';
-import { Store, distinctValues, type DatasetMeta } from './store.ts';
+import { Store, distinctValues, type DashboardState, type DatasetMeta } from './store.ts';
 import { hubFor } from './hub.ts';
 import {
   assertValidMessages,
   composeDashboard,
+  composeRestore,
   composeUpdate,
+  mergeComponents,
+  setByPointer,
   validateComponents,
 } from './dashboard.ts';
 
@@ -46,6 +49,16 @@ const DEFAULT_DATASET = 'ticket_sales';
 const A2UI_META = 'a2ui/messages';
 const DATASETS_META = 'a2ui/datasets';
 const DISPLAY_META = 'a2ui/display';
+/**
+ * The incremental form of an update, for a view that already holds the surface.
+ *
+ * `a2ui/messages` always carries a sequence that renders from nothing, because
+ * the view that gets a tool result is not guaranteed to be the view that got
+ * the last one. This key is the optimisation on top: when the surface is
+ * already there, applying just the delta keeps the user's filters and scroll
+ * position, which a rebuild would throw away.
+ */
+const A2UI_PATCH_META = 'a2ui/patch';
 
 const componentSchema = z.record(z.string(), z.unknown());
 
@@ -56,11 +69,17 @@ function dashboardResult(
   datasets: Array<{ id: string; rowCount: number; columns: string[] }>,
   structured: Record<string, unknown> = {},
   display?: string,
+  patch?: unknown[],
 ) {
   return {
     content: [{ type: 'text' as const, text: summary }],
     structuredContent: structured,
-    _meta: { [A2UI_META]: messages, [DATASETS_META]: datasets, ...(display ? { [DISPLAY_META]: display } : {}) },
+    _meta: {
+      [A2UI_META]: messages,
+      [DATASETS_META]: datasets,
+      ...(display ? { [DISPLAY_META]: display } : {}),
+      ...(patch?.length ? { [A2UI_PATCH_META]: patch } : {}),
+    },
   };
 }
 
@@ -236,7 +255,19 @@ export function createMcpServer(env: Env, origin?: string, ctx?: ExecutionContex
         const problems = validateComponents(args.components);
         if (problems.length) return problemResult(problems);
       }
-      const { messages, meta, componentCount } = await buildDashboard(store, args);
+      const { messages, meta, components, dataModel, componentCount } = await buildDashboard(store, args);
+
+      // Remember what is on screen, so a later partial update can be turned
+      // into something any view can render — including one opened after this
+      // dashboard was composed.
+      await store.saveDashboard({
+        datasetId: meta.id,
+        title: args.title ?? meta.title,
+        components,
+        dataModel,
+        display: args.display ?? 'auto',
+      });
+
       return dashboardResult(
         `Rendered the dashboard for "${meta.title}" — ${meta.rowCount.toLocaleString()} rows, ${componentCount} components. The view loads the rows itself; they are not in this result.`,
         messages,
@@ -272,24 +303,60 @@ export function createMcpServer(env: Env, origin?: string, ctx?: ExecutionContex
         const problems = validateComponents(args.components).filter(problem => !problem.includes('id "root"'));
         if (problems.length) return problemResult(problems);
       }
-      const messages = assertValidMessages(
-        composeUpdate({
-          components: args.components as never,
-          dataModel: args.dataModel as Array<{ path: string; value: unknown }>,
-        }),
+      const writes = (args.dataModel ?? []) as Array<{ path: string; value: unknown }>;
+      const patch = assertValidMessages(
+        composeUpdate({ components: args.components as never, dataModel: writes }),
       );
-      if (messages.length === 0) {
+      if (patch.length === 0) {
         return {
           content: [{ type: 'text' as const, text: 'Nothing to update — pass `components` or `dataModel`.' }],
           isError: true,
         };
       }
+
+      // Fold the change into the stored dashboard. If nothing has been rendered
+      // yet — a fresh deployment, or an agent that reached for an update first —
+      // fall back to the reference layout rather than failing: the user asked
+      // for a change to a dashboard, and one component is not a dashboard.
+      const base: Omit<DashboardState, 'updatedAt'> =
+        (await store.getDashboard()) ??
+        (await (async () => {
+          const reference = await buildDashboard(store, {});
+          return {
+            datasetId: reference.meta.id,
+            title: reference.meta.title,
+            components: reference.components,
+            dataModel: reference.dataModel,
+            display: 'auto',
+          };
+        })());
+      const components = mergeComponents(base.components, (args.components ?? []) as never);
+      const dataModel = { ...base.dataModel };
+      for (const write of writes) setByPointer(dataModel, write.path, write.value);
+
+      const saved = await store.saveDashboard({
+        datasetId: base.datasetId,
+        title: base.title,
+        components,
+        dataModel,
+        display: base.display,
+      });
+
+      // What every view can render, whether or not it has seen this surface
+      // before. The patch rides alongside for the one that has.
+      const full = assertValidMessages(composeRestore({ components: components as never, dataModel }));
+
+      // A view rebuilt from `full` starts with an empty data model, so it needs
+      // to be told which dataset to fetch — exactly as a fresh render is.
+      const datasetMeta = await store.getMeta(saved.datasetId);
       const ids = (args.components ?? []).map(component => String((component as { id?: unknown }).id));
       return dashboardResult(
         ids.length ? `Updated ${ids.length} component(s): ${ids.join(', ')}.` : 'Updated the data model.',
-        messages,
-        [],
-        { updatedComponents: ids },
+        full,
+        datasetMeta ? [{ id: datasetMeta.id, rowCount: datasetMeta.rowCount, columns: datasetMeta.columns }] : [],
+        { updatedComponents: ids, datasetId: saved.datasetId },
+        undefined,
+        patch,
       );
     },
   );
@@ -656,8 +723,18 @@ export async function buildDashboard(
   const update = messages.find(message => 'updateComponents' in message) as
     | { updateComponents: { components: unknown[] } }
     | undefined;
+  const seed = messages.find(message => 'updateDataModel' in message) as
+    | { updateDataModel: { value: Record<string, unknown> } }
+    | undefined;
 
-  return { messages, meta, componentCount: update?.updateComponents.components.length ?? 0 };
+  const components = update?.updateComponents.components ?? [];
+  return {
+    messages,
+    meta,
+    components,
+    dataModel: seed?.updateDataModel.value ?? {},
+    componentCount: components.length,
+  };
 }
 
 /** Count rows in an uploaded CSV without holding a second copy of the parse. */

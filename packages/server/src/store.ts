@@ -25,6 +25,30 @@ import seedCsv from './generated/ticket_sales.csv';
 const DATASET_KEY = (id: string) => `dataset:${id}`;
 const META_KEY = (id: string) => `dataset-meta:${id}`;
 const WIDGET_KEY = (name: string) => `widget:${name}`;
+const DASHBOARD_KEY = 'dashboard:current';
+
+/**
+ * The dashboard currently on screen.
+ *
+ * The server has to remember this. A partial update — "make that one a line
+ * chart" — is only meaningful against a surface that already exists, and the
+ * view receiving it may be a brand new one that has never seen that surface.
+ * Keeping the composed tree here is what lets any view be brought fully up to
+ * date, however it arrived.
+ *
+ * There is one of these, not one per conversation: the MCP transport is
+ * stateless and carries no session identity to key on. For a single-operator
+ * demo that is the honest trade; two people driving one deployment at the same
+ * time would share a dashboard.
+ */
+export interface DashboardState {
+  datasetId: string;
+  title?: string;
+  components: unknown[];
+  dataModel: Record<string, unknown>;
+  display?: string;
+  updatedAt: string;
+}
 
 export interface DatasetMeta {
   id: string;
@@ -275,6 +299,19 @@ export class Store {
     if (!(await this.getWidget(name))) return false;
     await this.kv.delete(WIDGET_KEY(name));
     return true;
+  }
+
+  // -- The dashboard on screen --------------------------------------------
+
+  async saveDashboard(state: Omit<DashboardState, 'updatedAt'>): Promise<DashboardState> {
+    const saved: DashboardState = { ...state, updatedAt: new Date().toISOString() };
+    await this.kv.put(DASHBOARD_KEY, JSON.stringify(saved));
+    return saved;
+  }
+
+  async getDashboard(): Promise<DashboardState | null> {
+    const raw = await this.kv.get(DASHBOARD_KEY);
+    return raw ? (JSON.parse(raw) as DashboardState) : null;
   }
 }
 

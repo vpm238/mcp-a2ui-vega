@@ -12,6 +12,7 @@ import { basicCatalog } from '@a2ui/react/v0_9';
 import { vegaDashboardCatalog } from './a2ui/catalog.ts';
 import {
   A2UI_META,
+  A2UI_PATCH_META,
   DATASETS_META,
   DISPLAY_META,
   Gateway,
@@ -38,6 +39,26 @@ function replaceExistingSurfaces(messages: unknown[], processor: { model: { surf
     out.push(message);
   }
   return out;
+}
+
+/**
+ * Whether this view already holds every surface a set of messages addresses.
+ *
+ * A patch is only applicable if it is, so this is the question that decides
+ * between the incremental payload and the one that rebuilds from nothing.
+ */
+function hasSurfaces(
+  processor: { model: { surfacesMap: ReadonlyMap<string, unknown> } },
+  messages: unknown[],
+): boolean {
+  const targets = new Set<string>();
+  for (const message of messages) {
+    for (const body of Object.values(message as Record<string, unknown>)) {
+      const id = (body as { surfaceId?: unknown } | null)?.surfaceId;
+      if (typeof id === 'string') targets.add(id);
+    }
+  }
+  return targets.size > 0 && [...targets].every(id => processor.model.surfacesMap.has(id));
 }
 
 /** What a dashboard tool returns: messages to render, datasets to fetch. */
@@ -126,18 +147,35 @@ export function useDashboard(
       const messages = (meta[A2UI_META] as unknown[]) ?? payload.a2ui;
       if (!Array.isArray(messages) || messages.length === 0) return;
 
+      /*
+       * Two ways to say the same thing, and the view picks.
+       *
+       * An update arrives with both a patch and a sequence that rebuilds the
+       * whole surface, because the server cannot know which view it is talking
+       * to: a host may route a second tool result into the running view, or
+       * open a fresh one that has never seen this surface. Applying a patch to
+       * a view that has the surface keeps the user's filters and scroll
+       * position; applying it to one that does not used to fail outright with
+       * "dashboard surface not found", which is the bug this pair fixes.
+       */
+      const patch = meta[A2UI_PATCH_META] as unknown[] | undefined;
+      const haveSurface = Array.isArray(patch) && patch.length > 0 && hasSurfaces(processor, patch);
+      const toApply = haveSurface ? patch! : messages;
+
       try {
-        processor.processMessages(replaceExistingSurfaces(messages, processor) as never);
+        processor.processMessages(replaceExistingSurfaces(toApply, processor) as never);
         setError(null);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
         return;
       }
 
-      // Only a full render decides the display mode; a partial update should
-      // not yank the panel open because it happened to send two components.
-      const created = messages.find(message => 'createSurface' in (message as object));
-      const update = messages.find(message => 'updateComponents' in (message as object)) as
+      // Only a full render decides the display mode. A patch applied to a
+      // surface already on screen should not yank the panel open because it
+      // happened to send two components — but a rebuild is that view's first
+      // sight of the dashboard, and does get to ask for room.
+      const created = toApply.find(message => 'createSurface' in (message as object));
+      const update = toApply.find(message => 'updateComponents' in (message as object)) as
         | { updateComponents: { components: unknown[] } }
         | undefined;
       if (created && update) {

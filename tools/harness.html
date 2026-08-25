@@ -34,6 +34,7 @@
         <button data-scenario="heatmap">3 · “Add a heatmap of when people buy”</button>
         <button data-scenario="append">4 · “Add five orders” (watch it move)</button>
         <button data-scenario="filter">5 · “Just show me Hamilton”</button>
+        <button data-scenario="update-fresh-view">6 · Recompose, but into a brand new view</button>
       </div>
       <h2>Protocol log</h2>
       <div id="log"></div>
@@ -230,7 +231,53 @@
         },
 
         filter: () => deliver('update_dashboard', { dataModel: [{ path: '/filters/show', value: ['Hamilton'] }] }),
+
+        /*
+         * The case that used to break, and the reason this button exists.
+         *
+         * A host is under no obligation to deliver a tool result to the view
+         * that received the last one — it may open a fresh view per result.
+         * That view has never seen the surface, so a payload consisting only of
+         * `updateComponents` fails with "dashboard surface not found". Reload
+         * the frame first and the update has to stand on its own.
+         */
+        'update-fresh-view': async () => {
+          await reloadView();
+          return deliver('update_dashboard', {
+            components: [
+              {
+                id: 'kpi_today',
+                component: 'KpiTile',
+                label: 'Sold today',
+                format: 'currency',
+                accent: 'green',
+                caption: 'Since midnight, New York',
+                value: {
+                  call: 'aggregate',
+                  args: {
+                    rows: { path: '/datasets/ticket_sales/rows' },
+                    op: 'sum',
+                    field: 'gross',
+                    where: [
+                      { field: 'status', op: 'eq', value: 'paid' },
+                      { field: 'ordered_at', op: 'startsWith', value: { path: '/meta/today' } },
+                    ],
+                  },
+                },
+              },
+            ],
+          });
+        },
       };
+
+      /** Throw the view away and open a new one, as a host is free to do. */
+      function reloadView() {
+        return new Promise(resolve => {
+          log('##', 'opening a fresh view');
+          frame.addEventListener('load', () => setTimeout(resolve, 900), { once: true });
+          frame.src = APP;
+        });
+      }
 
       for (const button of document.querySelectorAll('[data-scenario]')) {
         button.addEventListener('click', () => {

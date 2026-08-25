@@ -30,6 +30,14 @@ export interface ToolResult {
 export const A2UI_META = 'a2ui/messages';
 export const DATASETS_META = 'a2ui/datasets';
 export const DISPLAY_META = 'a2ui/display';
+/**
+ * The incremental form of an update.
+ *
+ * `a2ui/messages` renders from nothing; this renders a change onto a surface
+ * that is already here. Which of the two a view uses depends on what that view
+ * already holds — not on what the server guessed it would hold.
+ */
+export const A2UI_PATCH_META = 'a2ui/patch';
 
 export interface DatasetState {
   rowCount: number;

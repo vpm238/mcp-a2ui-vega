@@ -157,6 +157,65 @@ export function composeDashboard(options: ComposeOptions): A2uiMessage[] {
 }
 
 /**
+ * The messages that rebuild a surface from stored state, with no history
+ * needed.
+ *
+ * A patch is only meaningful to a view that already holds the surface, and
+ * whether the view receiving a tool result is that view is the host's business,
+ * not ours — some hosts route a second result into the running view, some open
+ * a fresh one. So every update also travels with a sequence that stands on its
+ * own, and the view picks whichever applies to it.
+ */
+export function composeRestore(options: {
+  components: A2uiComponent[];
+  dataModel: Record<string, unknown>;
+}): A2uiMessage[] {
+  return [
+    { version: A2UI_VERSION, createSurface: { surfaceId: SURFACE_ID, catalogId: CATALOG_ID, sendDataModel: false } },
+    { version: A2UI_VERSION, updateComponents: { surfaceId: SURFACE_ID, components: options.components } },
+    { version: A2UI_VERSION, updateDataModel: { surfaceId: SURFACE_ID, path: '/', value: options.dataModel } },
+  ];
+}
+
+/**
+ * Fold changed components into the tree the dashboard is currently made of.
+ *
+ * An id that exists is replaced in place — keeping its position, so recolouring
+ * a tile does not move it to the end — and an id that does not is appended.
+ */
+export function mergeComponents(existing: unknown[], incoming: A2uiComponent[]): unknown[] {
+  const byId = new Map(incoming.map(component => [String((component as { id?: unknown }).id), component]));
+  const merged = existing.map(component => {
+    const id = String((component as { id?: unknown }).id);
+    const replacement = byId.get(id);
+    if (!replacement) return component;
+    byId.delete(id);
+    return replacement;
+  });
+  return [...merged, ...byId.values()];
+}
+
+/**
+ * Write a JSON Pointer path into a plain object, creating the objects on the
+ * way down. Used to keep the stored data model in step with the writes an
+ * update sends, so a rebuilt view shows the same filters as the one on screen.
+ */
+export function setByPointer(target: Record<string, unknown>, pointer: string, value: unknown): void {
+  const parts = pointer.split('/').filter(Boolean).map(part => part.replace(/~1/g, '/').replace(/~0/g, '~'));
+  if (parts.length === 0) {
+    if (value && typeof value === 'object') Object.assign(target, value);
+    return;
+  }
+  let cursor: Record<string, unknown> = target;
+  for (const part of parts.slice(0, -1)) {
+    const next = cursor[part];
+    if (!next || typeof next !== 'object') cursor[part] = {};
+    cursor = cursor[part] as Record<string, unknown>;
+  }
+  cursor[parts[parts.length - 1]!] = value;
+}
+
+/**
  * Messages for changing a dashboard already on screen.
  *
  * This is the whole point of sending components rather than pictures: swapping
