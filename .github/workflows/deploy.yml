@@ -101,14 +101,23 @@ jobs:
           npm run build -w @mcp-a2ui-vega/renderer
           cp packages/catalog/dist/catalog.json packages/renderer/dist/site/catalog.json
 
-      - uses: actions/configure-pages@v5
-        with:
-          # Turn Pages on for the repository rather than making that a step in
-          # the README that everyone forgets.
-          enablement: true
+      # Enabling Pages needs a permission the workflow token does not have, so
+      # this is a one-time click in Settings. Until then, say so and stay green
+      # rather than failing every push over a demo page.
+      - id: pages
+        uses: actions/configure-pages@v5
+        continue-on-error: true
+
+      - name: Explain why the demo was not published
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo "::warning title=Demo not published::Enable Pages under Settings → Pages with source 'GitHub Actions', then re-run this workflow."
 
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outcome == 'success'
         with:
           path: packages/renderer/dist/site
+
       - id: deploy
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4

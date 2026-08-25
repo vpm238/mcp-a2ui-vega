@@ -136,8 +136,9 @@ with a warning rather than failing while they are missing:
 | `CLOUDFLARE_ACCOUNT_ID` | Your account id, from the Workers dashboard |
 | `CLOUDFLARE_KV_NAMESPACE_ID` | The id printed by `wrangler kv namespace create DATA` |
 
-The same workflow publishes the standalone demo to GitHub Pages, and turns Pages
-on for the repository itself the first time it runs.
+The same workflow publishes the standalone demo to GitHub Pages once Pages is
+enabled under **Settings → Pages** with source *GitHub Actions*. Until it is, the
+workflow says so in a warning and stays green.
 
 ## Test
 
