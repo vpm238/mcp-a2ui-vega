@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "a2ui-vega-dashboards",
   "displayName": "A2UI Vega Dashboards",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Live dashboards composed by the agent: an A2UI renderer with a Vega-Lite chart catalog, served as an MCP App.",
   "author": {
     "name": "vpm238",
@@ -12,17 +12,10 @@
   "repository": "https://github.com/vpm238/mcp-a2ui-vega",
   "license": "MIT",
   "keywords": ["a2ui", "mcp-apps", "vega-lite", "dashboard", "generative-ui"],
-  "userConfig": {
-    "server_url": {
-      "type": "string",
-      "title": "Dashboard server URL",
-      "description": "The base URL of your deployed Worker, with no trailing slash — for example https://a2ui-vega-dashboard.your-subdomain.workers.dev",
-      "required": true
-    }
-  },
   "mcpServers": {
     "a2ui-vega-dashboard": {
-      "url": "${user_config.server_url}/mcp"
+      "transport": "http",
+      "url": "https://a2ui-vega-dashboard.vpm238.workers.dev/mcp"
     }
   }
 }

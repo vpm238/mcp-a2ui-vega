@@ -123,8 +123,9 @@ from your machine, so `localhost` will not do.
 /plugin install a2ui-vega-dashboards@mcp-a2ui-vega
 ```
 
-It asks for your Worker's base URL, then wires up both the MCP server and the
-skill. Nothing to download by hand.
+That installs the MCP server and the skill together. The server URL is in
+`.claude-plugin/plugin.json` — if you deploy your own Worker, change that one
+line and `/plugin marketplace update mcp-a2ui-vega`.
 
 **Claude web or desktop:** Settings → Connectors → *Add custom connector*, and
 paste `https://your-worker.workers.dev/mcp`. There is no OAuth and no key. Then
