@@ -109,6 +109,29 @@ function HostedApp() {
   const state = useDashboard(callTool, forwardAction);
   handler.current = state.applyToolResult;
 
+  // Ask for the room the surface needs. The host decides whether to grant it,
+  // and lists what it can offer — asking for a mode it does not support is how
+  // you get an error instead of a dashboard.
+  const requested = useRef<string | null>(null);
+  useEffect(() => {
+    if (!connectedApp || !isConnected || !state.display) return;
+    const context = connectedApp.getHostContext();
+    const available = context?.availableDisplayModes ?? ['inline'];
+
+    // Compare against the last mode *we asked for*, not the host context: a
+    // host that grants a request without announcing it would otherwise leave us
+    // convinced we are still inline, and a later "go back to inline" would be
+    // skipped as a no-op.
+    const current = requested.current ?? context?.displayMode ?? 'inline';
+    if (current === state.display || !available.includes(state.display)) return;
+
+    requested.current = state.display;
+    void connectedApp.requestDisplayMode({ mode: state.display }).catch(() => {
+      // A refusal is a legitimate answer; the dashboard still renders.
+      requested.current = null;
+    });
+  }, [connectedApp, isConnected, state.display]);
+
   return (
     <DarkContext.Provider value={dark}>
       <GatewayContext.Provider value={state.gateway}>

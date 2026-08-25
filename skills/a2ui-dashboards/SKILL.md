@@ -111,6 +111,18 @@ descriptive — `kpi_gross`, `kpi_today`, `kpi_tickets`, `kpi_price`,
 `chart_timeline`, `chart_channel`, `chart_show`, `chart_section`,
 `table_recent`, and the `sec_*` sections that wrap them.
 
+## Inline or full panel
+
+A dashboard opens in the host's larger panel; a single chart stays in the
+conversation. The view works this out from what you sent — two or more sections,
+a grid of three, or eight components means "workspace" — so you usually do not
+have to think about it.
+
+When you do, `render_dashboard` takes `display: "inline" | "fullscreen"`. Use
+`inline` for a one-chart answer to a passing question, and `fullscreen` when
+someone will actually work in the thing. The host may refuse either; the
+dashboard renders regardless.
+
 ## Recipes
 
 [`references/recipes.md`](references/recipes.md) has a worked, verified spec for

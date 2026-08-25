@@ -29,6 +29,7 @@ export interface ToolResult {
  */
 export const A2UI_META = 'a2ui/messages';
 export const DATASETS_META = 'a2ui/datasets';
+export const DISPLAY_META = 'a2ui/display';
 
 export interface DatasetState {
   rowCount: number;

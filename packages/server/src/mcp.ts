@@ -44,6 +44,7 @@ const DEFAULT_DATASET = 'ticket_sales';
 /** A2UI messages ride in `_meta`, where they reach the view without reaching the model. */
 const A2UI_META = 'a2ui/messages';
 const DATASETS_META = 'a2ui/datasets';
+const DISPLAY_META = 'a2ui/display';
 
 const componentSchema = z.record(z.string(), z.unknown());
 
@@ -53,11 +54,12 @@ function dashboardResult(
   messages: unknown[],
   datasets: Array<{ id: string; rowCount: number; columns: string[] }>,
   structured: Record<string, unknown> = {},
+  display?: string,
 ) {
   return {
     content: [{ type: 'text' as const, text: summary }],
     structuredContent: structured,
-    _meta: { [A2UI_META]: messages, [DATASETS_META]: datasets },
+    _meta: { [A2UI_META]: messages, [DATASETS_META]: datasets, ...(display ? { [DISPLAY_META]: display } : {}) },
   };
 }
 
@@ -195,6 +197,12 @@ export function createMcpServer(env: Env): McpServer {
           .array(z.string())
           .optional()
           .describe('Names of saved widgets to add to the reference dashboard.'),
+        display: z
+          .enum(['auto', 'inline', 'fullscreen'])
+          .optional()
+          .describe(
+            'How much room to ask the host for. Defaults to auto: a full dashboard opens in the larger panel, a single chart or a couple of tiles stays inline. The host may refuse.',
+          ),
       },
       _meta: { ui: { resourceUri: UI_RESOURCE, visibility: ['model', 'app'] } },
     },
@@ -209,6 +217,7 @@ export function createMcpServer(env: Env): McpServer {
         messages,
         [{ id: meta.id, rowCount: meta.rowCount, columns: meta.columns }],
         { datasetId: meta.id, rowCount: meta.rowCount, columns: meta.columns, updatedAt: meta.updatedAt },
+        args.display ?? 'auto',
       );
     },
   );

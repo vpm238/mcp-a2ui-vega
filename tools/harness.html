@@ -96,6 +96,7 @@
               hostContext: {
                 theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
                 displayMode: 'inline',
+              availableDisplayModes: ['inline', 'fullscreen'],
                 locale: 'en-US',
                 timeZone: 'America/New_York',
                 platform: 'web',
@@ -124,7 +125,23 @@
           return;
         }
 
-        if (message.method === 'ui/open-link' || message.method === 'ui/request-display-mode') {
+        if (message.method === 'ui/request-display-mode') {
+          // A real host would resize the panel here; the harness just records
+          // that the view asked, and grants it.
+          const mode = message.params?.mode ?? 'inline';
+          log('!!', `view asked for display mode: ${mode}`);
+          document.body.dataset.displayMode = mode;
+          if (message.id !== undefined) send({ jsonrpc: '2.0', id: message.id, result: { mode } });
+          // A host that changes the display mode tells the view about it.
+          send({
+            jsonrpc: '2.0',
+            method: 'ui/notifications/host-context-changed',
+            params: { displayMode: mode },
+          });
+          return;
+        }
+
+        if (message.method === 'ui/open-link') {
           if (message.id !== undefined) send({ jsonrpc: '2.0', id: message.id, result: {} });
         }
       });

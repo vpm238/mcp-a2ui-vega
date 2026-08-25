@@ -10,7 +10,15 @@ import { MessageProcessor } from '@a2ui/web_core/v0_9';
 import type { SurfaceModel } from '@a2ui/web_core/v0_9';
 import { basicCatalog } from '@a2ui/react/v0_9';
 import { vegaDashboardCatalog } from './a2ui/catalog.ts';
-import { A2UI_META, DATASETS_META, Gateway, readResult, type CallTool, type ToolResult } from './mcp/gateway.ts';
+import {
+  A2UI_META,
+  DATASETS_META,
+  DISPLAY_META,
+  Gateway,
+  readResult,
+  type CallTool,
+  type ToolResult,
+} from './mcp/gateway.ts';
 
 /**
  * Asking for a dashboard twice is normal — "now add a heatmap" is a second
@@ -44,6 +52,32 @@ export interface DashboardState {
   /** Feed a tool result — from a host notification or a direct call. */
   applyToolResult: (result: ToolResult) => void;
   error: string | null;
+  /** How much room this surface wants. Null until something has been rendered. */
+  display: DisplayMode | null;
+}
+
+export type DisplayMode = 'inline' | 'fullscreen' | 'pip';
+
+/**
+ * How much room a surface deserves.
+ *
+ * A single chart someone asked for in passing belongs in the conversation. A
+ * dashboard — several sections, a grid, a table — is a workspace, and squeezing
+ * it into the width of a chat message helps nobody. So the view measures what it
+ * was given and asks the host accordingly; the agent can override with
+ * `display`, and the host is free to refuse either way.
+ */
+function measureDisplay(components: unknown[]): DisplayMode {
+  let sections = 0;
+  let gridChildren = 0;
+  for (const component of components) {
+    const name = (component as { component?: string }).component;
+    if (name === 'Section') sections++;
+    if (name === 'DashboardGrid') {
+      gridChildren += ((component as { children?: unknown[] }).children ?? []).length;
+    }
+  }
+  return sections >= 2 || gridChildren >= 3 || components.length >= 8 ? 'fullscreen' : 'inline';
 }
 
 export function useDashboard(
@@ -71,6 +105,7 @@ export function useDashboard(
     ...(processor.model.surfacesMap.values() as Iterable<SurfaceModel<never>>),
   ]);
   const [error, setError] = useState<string | null>(null);
+  const [display, setDisplay] = useState<DisplayMode | null>(null);
 
   useEffect(() => {
     const sync = () => setSurfaces([...(processor.model.surfacesMap.values() as Iterable<SurfaceModel<never>>)]);
@@ -99,6 +134,17 @@ export function useDashboard(
         return;
       }
 
+      // Only a full render decides the display mode; a partial update should
+      // not yank the panel open because it happened to send two components.
+      const created = messages.find(message => 'createSurface' in (message as object));
+      const update = messages.find(message => 'updateComponents' in (message as object)) as
+        | { updateComponents: { components: unknown[] } }
+        | undefined;
+      if (created && update) {
+        const asked = meta[DISPLAY_META] as DisplayMode | 'auto' | undefined;
+        setDisplay(asked && asked !== 'auto' ? asked : measureDisplay(update.updateComponents.components));
+      }
+
       // Rows are deliberately not in the payload — they would land in the
       // model's context on the way here. The view fetches them itself.
       const datasets = (meta[DATASETS_META] as Array<{ id: string }>) ?? payload.datasets ?? [];
@@ -109,5 +155,5 @@ export function useDashboard(
     [processor, gateway],
   );
 
-  return { surfaces, gateway, applyToolResult, error };
+  return { surfaces, gateway, applyToolResult, error, display };
 }
