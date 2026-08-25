@@ -30,8 +30,9 @@ jobs:
       - name: Typecheck the renderer
         run: npm run build -w @mcp-a2ui-vega/renderer
 
-      - name: Typecheck the server
+      # Also bundles the app and the seed CSV, and dry-runs the Worker build,
+      # which is the only check that the whole thing would actually deploy.
+      - name: Build the server
         run: |
           npm run build:app -w @mcp-a2ui-vega/renderer
-          npm run assets -w @mcp-a2ui-vega/server
-          npx --workspace @mcp-a2ui-vega/server tsc --noEmit
+          npm run build -w @mcp-a2ui-vega/server
