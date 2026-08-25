@@ -108,7 +108,11 @@ function temporalFields(node: unknown, found = new Set<string>()): Set<string> {
     return found;
   }
   const record = node as Record<string, unknown>;
-  if (record.type === 'temporal' && typeof record.field === 'string') found.add(record.field);
+  // `type: 'temporal'` is the usual signal, but a `timeUnit` on an ordinal
+  // encoding — how weekday-by-hour heatmaps are written — needs a date too.
+  if (typeof record.field === 'string' && (record.type === 'temporal' || typeof record.timeUnit === 'string')) {
+    found.add(record.field);
+  }
   for (const value of Object.values(record)) temporalFields(value, found);
   return found;
 }
@@ -145,8 +149,19 @@ export function buildSpec(userSpec: Record<string, unknown>, options: BuildSpecO
   spec.background = 'transparent';
 
   // Faceted, concatenated and repeated specs size their own children; forcing a
-  // container width on the outer spec breaks them.
-  const isComposite = 'facet' in spec || 'hconcat' in spec || 'vconcat' in spec || 'concat' in spec || 'repeat' in spec;
+  // container width on the outer spec breaks them, and Vega says so. Faceting
+  // has two spellings — a top-level `facet`, or `facet`/`row`/`column` inside
+  // `encoding` — and both need the same treatment.
+  const encoding = (spec.encoding ?? {}) as Record<string, unknown>;
+  const isComposite =
+    'facet' in spec ||
+    'hconcat' in spec ||
+    'vconcat' in spec ||
+    'concat' in spec ||
+    'repeat' in spec ||
+    'facet' in encoding ||
+    'row' in encoding ||
+    'column' in encoding;
   if (!isComposite) {
     if (spec.width === undefined) spec.width = 'container';
     if (spec.height === undefined) spec.height = options.height ?? 260;

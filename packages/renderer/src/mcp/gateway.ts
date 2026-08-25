@@ -77,10 +77,20 @@ export function expandRows(payload: RowsPayload): Array<Record<string, unknown>>
 
 type Listener = () => void;
 
+/**
+ * How often a dataset is re-read once something has bound to it.
+ *
+ * Polling lives here rather than in a component because a dashboard should be
+ * live whether or not whoever composed it remembered to include a status
+ * badge. `DatasetStatus` tunes this; it does not own it.
+ */
+const DEFAULT_POLL_SECONDS = 15;
+
 export class Gateway {
   private readonly datasets = new Map<string, DatasetState>();
   private readonly listeners = new Set<Listener>();
   private inFlight = new Map<string, Promise<void>>();
+  private readonly polls = new Map<string, { seconds: number; timer: ReturnType<typeof setInterval> }>();
 
   constructor(
     private readonly processor: MessageProcessor<never>,
@@ -96,6 +106,34 @@ export class Gateway {
 
   private emit() {
     for (const listener of this.listeners) listener();
+  }
+
+  /**
+   * Re-read a dataset on a timer. Called automatically the first time a dataset
+   * loads; `DatasetStatus` calls it again with the interval the agent asked
+   * for. Zero stops it.
+   */
+  setPollInterval(id: string, seconds: number = DEFAULT_POLL_SECONDS) {
+    const existing = this.polls.get(id);
+    if (existing?.seconds === seconds) return;
+    if (existing) clearInterval(existing.timer);
+    this.polls.delete(id);
+    if (!(seconds > 0)) return;
+
+    const timer = setInterval(() => {
+      // A hidden panel does not need fresh numbers, and a tab left open
+      // overnight should not keep asking for them.
+      if (typeof document !== 'undefined' && document.hidden) return;
+      void this.loadDataset(id, { force: true });
+    }, seconds * 1000);
+    this.polls.set(id, { seconds, timer });
+  }
+
+  /** Stop every poll — used when the view is torn down. */
+  dispose() {
+    for (const { timer } of this.polls.values()) clearInterval(timer);
+    this.polls.clear();
+    this.listeners.clear();
   }
 
   datasetState(id: string): DatasetState {
@@ -149,6 +187,10 @@ export class Gateway {
           updatedAt: payload.updatedAt ?? '',
           columns: payload.columns ?? Object.keys(rows[0] ?? {}),
         });
+
+        // Anything bound to this dataset is now live, without the dashboard
+        // having had to ask for it.
+        if (!this.polls.has(id)) this.setPollInterval(id);
       } catch (error) {
         this.datasets.set(id, {
           ...this.datasetState(id),

@@ -62,6 +62,7 @@ export function ticketSalesComponents(options: DashboardOptions): A2uiComponent[
       datasetId: options.datasetId,
       refreshSeconds: 10,
       showRefreshButton: true,
+      showAutoRefreshToggle: true,
     },
 
     // Metrics. Each one aggregates the live rows, so an appended order moves

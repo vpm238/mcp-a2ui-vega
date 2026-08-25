@@ -24,6 +24,42 @@ follow. If you paste rows into a spec instead, the chart is a snapshot: the next
 appended order will not appear in it, and you will have put a dataset through
 the conversation for nothing.
 
+## Who updates what
+
+There are two writers to a dashboard, and only one of them is you.
+
+**You** write components. `render_dashboard` and `update_dashboard` are the only
+times a dashboard's *structure* changes, and they happen at conversation speed —
+when someone asks for something.
+
+**The view** writes data. Once a chart is bound to a dataset path, the view
+fetches the rows itself and issues its own `updateDataModel` locally, on a timer.
+An A2UI message does not have to come from an agent; the renderer does not care
+who produced it. So an order placed thirty seconds ago appears on the dashboard
+without you being told, without a tool call, and without a turn.
+
+This is why binding matters so much. A bound dashboard keeps working after the
+conversation moves on. An inlined one is a photograph.
+
+You are told about new data only if you asked to be: give `DatasetStatus` an
+`action` and it fires when the row count changes. Leave it off unless the user
+wants commentary on every sale.
+
+## Dashboards update themselves
+
+Any dashboard you compose is live, because the view polls whatever datasets its
+components bind to — you do not have to arrange it. Two things are still worth
+doing:
+
+- Include a `DatasetStatus` somewhere. It shows the row count and freshness, so
+  the user can see the thing is live rather than having to trust it. It also
+  carries the two controls they need: **Refresh** to re-read now, and an
+  **Auto** switch to pause and resume polling — theirs to flip, whatever you
+  set. Use `refreshSeconds` for the pace (10 for a demo, 60 for something
+  long-running, 0 to start paused).
+- Compute with `aggregate` rather than pasting numbers into `Text`. A tile that
+  recomputes stays true; a sentence you wrote goes stale on the next order.
+
 ## Getting started
 
 1. `render_dashboard` with no arguments gives the reference ticket-sales
@@ -74,6 +110,15 @@ Two components, one call. The ids in the reference dashboard are stable and
 descriptive — `kpi_gross`, `kpi_today`, `kpi_tickets`, `kpi_price`,
 `chart_timeline`, `chart_channel`, `chart_show`, `chart_section`,
 `table_recent`, and the `sec_*` sections that wrap them.
+
+## Recipes
+
+[`references/recipes.md`](references/recipes.md) has a worked, verified spec for
+every shape of question — trend, ranking, share over time, composition, heatmap,
+histogram, box plot, computed field, running total, small multiples, scatter with
+a trend line. Every one of them was rendered in a browser against this dataset
+before being written down. Start from the closest one rather than composing from
+nothing.
 
 ## Charts the catalog never named
 
@@ -142,7 +187,7 @@ update_dashboard({ dataModel: [{ path: "/filters/show", value: ["Hamilton"] }] }
 | `Section` | `title`, `subtitle`, `child`, `trailing` — one per idea, so it can be replaced by id |
 | `CsvDropZone` | `datasetId`, `mode` — the user drops a CSV and the dashboard updates |
 | `AppendRowForm` | `datasetId`, `fields[]` — add one row from the surface |
-| `DatasetStatus` | `datasetId`, `refreshSeconds` — row count, freshness, the live poll |
+| `DatasetStatus` | `datasetId`, `refreshSeconds`, `showRefreshButton`, `showAutoRefreshToggle` — row count, freshness, and the viewer's refresh and pause controls |
 
 Plus A2UI's basic catalog in the same catalog id: `Column`, `Row`, `Card`,
 `Text`, `Button`, `TextField`, `ChoicePicker`, `Slider`, `Tabs`, `Divider`,

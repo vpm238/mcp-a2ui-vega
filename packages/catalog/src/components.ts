@@ -188,8 +188,14 @@ export const DatasetStatusApi = {
   schema: props({
     datasetId: z.string(),
     label: DynamicString.optional(),
-    refreshSeconds: z.number().optional().describe('Poll interval. 0 or omitted disables polling.'),
-    showRefreshButton: DynamicBoolean.optional(),
+    refreshSeconds: z
+      .number()
+      .optional()
+      .describe('Poll interval in seconds. Omitted uses the renderer default of 15; 0 starts paused.'),
+    showRefreshButton: DynamicBoolean.optional().describe('Show a button that re-reads the dataset now. Defaults to true.'),
+    showAutoRefreshToggle: DynamicBoolean.optional().describe(
+      'Show a switch that lets the viewer pause and resume auto-refresh. Defaults to true.',
+    ),
     action: Action.optional().describe('Fired after each refresh that changed the row count.'),
   }),
 };

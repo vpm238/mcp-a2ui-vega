@@ -498,3 +498,59 @@ body {
   font-family: var(--font);
   color: var(--ink);
 }
+
+/* Auto-refresh switch, next to the refresh button in the status badge. */
+.status__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 8px 3px 4px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+
+.status__toggle--on {
+  color: var(--ink);
+  border-color: color-mix(in srgb, #16a34a 45%, var(--line));
+}
+
+.status__toggle-track {
+  width: 22px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--line);
+  position: relative;
+  transition: background 120ms ease;
+  flex: none;
+}
+
+.status__toggle--on .status__toggle-track {
+  background: #16a34a;
+}
+
+.status__toggle-knob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--surface);
+  transition: transform 120ms ease;
+}
+
+.status__toggle--on .status__toggle-knob {
+  transform: translateX(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status__toggle-track,
+  .status__toggle-knob {
+    transition: none;
+  }
+}

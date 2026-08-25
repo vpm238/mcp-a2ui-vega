@@ -5,7 +5,7 @@
  * makes an append from anywhere (the CSV drop zone, the agent, a script running
  * in a terminal) show up without anyone asking the dashboard to update.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createComponentImplementation } from '@a2ui/react/v0_9';
 import { DatasetStatusApi } from '@mcp-a2ui-vega/catalog';
 import { useDatasetState, useGateway } from './context.ts';
@@ -27,11 +27,16 @@ export const DatasetStatus = createComponentImplementation(DatasetStatusApi, ({ 
   const lastCount = useRef<number | null>(null);
   const interval = Number(props.refreshSeconds ?? 0);
 
+  // Auto-refresh is on unless the agent asked for it to start paused, and the
+  // viewer can override either way — it is their panel.
+  const [auto, setAuto] = useState(() => props.refreshSeconds !== 0);
+
+  // The gateway owns the timer; this component only says how fast. That way a
+  // dashboard without a status badge still refreshes.
   useEffect(() => {
-    if (!gateway || interval <= 0) return;
-    const timer = setInterval(() => void gateway.loadDataset(props.datasetId, { force: true }), interval * 1000);
-    return () => clearInterval(timer);
-  }, [gateway, props.datasetId, interval]);
+    if (!gateway) return;
+    gateway.setPollInterval(props.datasetId, auto ? interval || undefined : 0);
+  }, [gateway, props.datasetId, interval, auto]);
 
   // Tell the agent only when the row count actually moved — a poll that found
   // nothing new is not news.
@@ -53,14 +58,29 @@ export const DatasetStatus = createComponentImplementation(DatasetStatusApi, ({ 
 
   return (
     <div className={`status${state.loading ? ' status--busy' : ''}`}>
-      <span className={`status__dot${interval > 0 ? ' status__dot--live' : ''}`} aria-hidden="true" />
+      <span className={`status__dot${auto ? ' status__dot--live' : ''}`} aria-hidden="true" />
       <span className="status__text">
         {props.label ?? `${state.rowCount.toLocaleString()} rows`}
         <span className="status__meta">
           {state.error ? ` · ${state.error}` : ` · ${state.loading ? 'refreshing…' : ago(state.refreshedAt)}`}
         </span>
       </span>
-      {props.showRefreshButton ? (
+      {props.showAutoRefreshToggle !== false ? (
+        <button
+          type="button"
+          className={`status__toggle${auto ? ' status__toggle--on' : ''}`}
+          role="switch"
+          aria-checked={auto}
+          title={auto ? 'Auto-refresh is on — click to pause' : 'Auto-refresh is paused — click to resume'}
+          onClick={() => setAuto(value => !value)}
+        >
+          <span className="status__toggle-track" aria-hidden="true">
+            <span className="status__toggle-knob" />
+          </span>
+          Auto
+        </button>
+      ) : null}
+      {props.showRefreshButton !== false ? (
         <button
           type="button"
           className="status__refresh"
