@@ -149,7 +149,7 @@ export function useDashboard(
       // model's context on the way here. The view fetches them itself.
       const datasets = (meta[DATASETS_META] as Array<{ id: string }>) ?? payload.datasets ?? [];
       for (const dataset of datasets) {
-        void gateway?.loadDataset(dataset.id, { force: true });
+        void gateway?.loadDataset(dataset.id, { force: true, publish: true });
       }
     },
     [processor, gateway],

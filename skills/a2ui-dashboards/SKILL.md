@@ -41,6 +41,11 @@ without you being told, without a tool call, and without a turn.
 This is why binding matters so much. A bound dashboard keeps working after the
 conversation moves on. An inlined one is a photograph.
 
+The server cannot start this. It has no channel to the view — it answers the
+host, and the host talks to the view — so the view asks. It asks cheaply: the
+poll carries the `updatedAt` it already has, and a dataset that has not moved
+answers in a few dozen bytes instead of the whole thing.
+
 You are told about new data only if you asked to be: give `DatasetStatus` an
 `action` and it fires when the row count changes. Leave it off unless the user
 wants commentary on every sale.

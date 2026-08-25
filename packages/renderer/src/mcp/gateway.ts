@@ -48,6 +48,8 @@ interface RowsPayload {
   rowCount?: number;
   updatedAt?: string;
   format?: 'rows' | 'columnar';
+  /** The server's answer when nothing has changed since `since`. */
+  unchanged?: boolean;
 }
 
 /** Read a tool result that may report structured data or a JSON text block. */
@@ -92,6 +94,15 @@ export class Gateway {
   private readonly listeners = new Set<Listener>();
   private inFlight = new Map<string, Promise<void>>();
   private readonly polls = new Map<string, { seconds: number; timer: ReturnType<typeof setInterval> }>();
+  /**
+   * The last rows published for each dataset.
+   *
+   * Needed because "unchanged" is relative to what *this gateway* last fetched,
+   * not to what the surface currently holds — and a re-render replaces the
+   * surface with an empty data model. Without the cache, rendering a dashboard
+   * twice in a row leaves the second one with no data.
+   */
+  private readonly rowsCache = new Map<string, Array<Record<string, unknown>>>();
 
   constructor(
     private readonly processor: MessageProcessor<never>,
@@ -135,6 +146,7 @@ export class Gateway {
     for (const { timer } of this.polls.values()) clearInterval(timer);
     this.polls.clear();
     this.listeners.clear();
+    this.rowsCache.clear();
   }
 
   datasetState(id: string): DatasetState {
@@ -156,7 +168,7 @@ export class Gateway {
    * Concurrent calls for the same dataset share one request: a poll landing on
    * top of a manual refresh should not double the work.
    */
-  async loadDataset(id: string, options: { force?: boolean } = {}): Promise<void> {
+  async loadDataset(id: string, options: { force?: boolean; publish?: boolean } = {}): Promise<void> {
     const existing = this.inFlight.get(id);
     if (existing && !options.force) return existing;
 
@@ -166,9 +178,32 @@ export class Gateway {
       this.emit();
 
       try {
+        // Tell the server what we already have. A poll that finds nothing new
+        // comes back as a few bytes instead of the whole dataset.
         const payload = readResult(
-          await this.callTool(TOOLS.getDatasetRows, { datasetId: id, format: 'columnar' }),
+          await this.callTool(TOOLS.getDatasetRows, {
+            datasetId: id,
+            format: 'columnar',
+            ...(previous.updatedAt ? { since: previous.updatedAt } : {}),
+          }),
         ) as RowsPayload;
+
+        if (payload.unchanged) {
+          this.datasets.set(id, { ...previous, loading: false, refreshedAt: Date.now() });
+          // A fresh surface needs the rows even though the server has nothing
+          // new to say. Publishing from cache costs nothing over the wire.
+          const cached = this.rowsCache.get(id);
+          if (options.publish && cached) {
+            this.writeDataModel(datasetPath(id), {
+              rows: cached,
+              rowCount: previous.rowCount,
+              updatedAt: previous.updatedAt,
+              columns: previous.columns,
+            });
+          }
+          return;
+        }
+
         // CSV rows arrive as text. Type them here, once, rather than leaving
         // every chart and aggregate to coerce for itself.
         const raw = expandRows(payload);
@@ -182,6 +217,7 @@ export class Gateway {
           refreshedAt: Date.now(),
         });
 
+        this.rowsCache.set(id, rows);
         this.writeDataModel(datasetPath(id), {
           rows,
           rowCount: payload.rowCount ?? rows.length,

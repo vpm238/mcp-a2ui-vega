@@ -335,11 +335,31 @@ export function createMcpServer(env: Env): McpServer {
         datasetId: z.string().optional(),
         format: z.enum(['rows', 'columnar']).optional(),
         limit: z.number().optional(),
+        since: z
+          .string()
+          .optional()
+          .describe(
+            "The `updatedAt` the caller already has. If the dataset has not changed since then, the rows are omitted and `unchanged: true` comes back instead.",
+          ),
       },
       _meta: { ui: { visibility: ['app'] } },
     },
     async args => {
-      const { rows, meta } = await store.getRows(args.datasetId ?? DEFAULT_DATASET, args.limit);
+      const id = args.datasetId ?? DEFAULT_DATASET;
+
+      // A poll that finds nothing new should cost a few bytes, not the whole
+      // dataset. This is what makes a fifteen-second refresh reasonable.
+      if (args.since) {
+        const current = await store.getMeta(id);
+        if (current && current.updatedAt === args.since) {
+          return {
+            content: [{ type: 'text' as const, text: 'unchanged' }],
+            structuredContent: { unchanged: true, rowCount: current.rowCount, updatedAt: current.updatedAt },
+          };
+        }
+      }
+
+      const { rows, meta } = await store.getRows(id, args.limit);
       // Columnar cuts the payload roughly in half by not repeating every key on
       // every row — worth it when the view pulls the whole dataset.
       const structured =
