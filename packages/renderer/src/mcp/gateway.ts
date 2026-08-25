@@ -100,12 +100,21 @@ type Listener = () => void;
 const DEFAULT_POLL_SECONDS = 15;
 const SUBSCRIBED_POLL_SECONDS = 120;
 
-/** Where the change stream lives, written into the bundle by the server. */
-function serverOrigin(): string | null {
-  const injected = (window as { __MCP_SERVER_ORIGIN__?: string }).__MCP_SERVER_ORIGIN__;
-  if (injected && !injected.startsWith('@@')) return injected.replace(/\/$/, '');
+/**
+ * Which server this bundle belongs to.
+ *
+ * A bundle served by the Worker has the Worker's origin written into it on the
+ * way out, so it knows where it came from without being told. `?server=` still
+ * wins, for pointing a copy of the page at a different deployment. A bundle
+ * served from anywhere else — GitHub Pages, a file:// path — still holds the
+ * placeholder, and gets null: there is no server, and the caller falls back to
+ * the demo data.
+ */
+export function serverOrigin(): string | null {
   const fromQuery = new URLSearchParams(window.location.search).get('server');
-  return fromQuery ? fromQuery.replace(/\/$/, '') : null;
+  if (fromQuery) return fromQuery.replace(/\/$/, '');
+  const injected = (window as { __MCP_SERVER_ORIGIN__?: string }).__MCP_SERVER_ORIGIN__;
+  return injected && !injected.startsWith('@@') ? injected.replace(/\/$/, '') : null;
 }
 
 export class Gateway {

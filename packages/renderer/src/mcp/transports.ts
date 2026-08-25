@@ -51,7 +51,15 @@ export function demoToolCaller(csvUrl: string): CallTool {
   async function load(): Promise<Array<Record<string, string>>> {
     if (rows) return rows;
     const response = await fetch(csvUrl);
-    if (!response.ok) throw new Error(`could not load the demo dataset: ${response.status}`);
+    if (!response.ok) {
+      // Name the file and the way out: this page is reached by opening a URL,
+      // so whoever hits the error has no console and no context to work from.
+      throw new Error(
+        `Could not load the demo dataset at ${csvUrl} (${response.status}). This page falls back ` +
+          'to a bundled CSV when there is no server behind it. Point it at a deployment with ' +
+          '?server=https://your-worker.workers.dev',
+      );
+    }
     rows = parseCsv(await response.text());
     return rows;
   }

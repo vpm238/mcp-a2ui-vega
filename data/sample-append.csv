@@ -1,0 +1,41 @@
+order_id,ordered_at,event_date,event_time,show,theatre,section,channel,promo_code,quantity,unit_price,gross,customer_segment,status
+ORD-0900000,2026-08-25T16:52:43,2026-10-11,15:00,Beetlejuice,Winter Garden Theatre,Orchestra,Web,MEMBER10,2,113.00,226.00,Member,paid
+ORD-0900001,2026-08-25T16:58:01,2026-09-01,19:00,Ain't Too Proud-The Life and Times of the Temptations,Imperial Theatre,Front Mezzanine,Web,,5,155.50,777.50,Group,paid
+ORD-0900002,2026-08-25T17:01:47,2026-09-01,19:00,Beetlejuice,Winter Garden Theatre,Rear Mezzanine,Web,,3,63.00,189.00,Local,paid
+ORD-0900003,2026-08-25T17:10:39,2026-08-30,15:00,Mean Girls,August Wilson Theatre,Orchestra,TodayTix,,3,95.50,286.50,Tourist,paid
+ORD-0900004,2026-08-25T17:12:41,2026-09-16,14:00,Moulin Rouge! The Musical!,Al Hirschfeld Theatre,Front Mezzanine,Mobile App,,2,236.00,472.00,Member,paid
+ORD-0900005,2026-08-25T17:12:45,2026-09-22,19:00,Ain't Too Proud-The Life and Times of the Temptations,Imperial Theatre,Balcony,TodayTix,,6,55.50,333.00,Tourist,paid
+ORD-0900006,2026-08-25T17:18:43,2026-08-26,14:00,To Kill A Mockingbird,Sam S. Shubert Theatre,Box,TodayTix,,2,299.50,599.00,Tourist,paid
+ORD-0900007,2026-08-25T17:21:52,2026-11-27,20:00,The Phantom of the Opera,Majestic Theatre,Rear Mezzanine,Box Office,,1,96.00,96.00,Tourist,paid
+ORD-0900008,2026-08-25T17:24:38,2026-10-25,15:00,Hamilton,Richard Rodgers Theatre,Orchestra,Box Office,,2,409.00,818.00,Tourist,paid
+ORD-0900009,2026-08-25T17:29:37,2026-10-03,14:00,To Kill A Mockingbird,Sam S. Shubert Theatre,Orchestra,Web,,2,211.00,422.00,Local,paid
+ORD-0900010,2026-08-25T17:30:17,2026-08-26,19:00,Wicked,Gershwin Theatre,Front Mezzanine,Mobile App,,4,146.00,584.00,Local,paid
+ORD-0900011,2026-08-25T17:30:34,2026-08-26,19:00,Moulin Rouge! The Musical!,Al Hirschfeld Theatre,Orchestra,Box Office,,1,291.00,291.00,Local,paid
+ORD-0900012,2026-08-25T17:31:06,2026-08-29,14:00,Mean Girls,August Wilson Theatre,Orchestra,TodayTix,,3,104.50,313.50,Tourist,paid
+ORD-0900013,2026-08-25T17:33:25,2026-10-30,20:00,Ain't Too Proud-The Life and Times of the Temptations,Imperial Theatre,Balcony,TKTS Booth,TKTS50,4,31.50,126.00,Local,paid
+ORD-0900014,2026-08-25T17:36:10,2026-10-08,19:00,Wicked,Gershwin Theatre,Front Mezzanine,TKTS Booth,TKTS50,1,84.00,84.00,Tourist,paid
+ORD-0900015,2026-08-25T17:46:32,2026-08-29,20:00,Mean Girls,August Wilson Theatre,Balcony,Web,,1,57.50,57.50,Tourist,paid
+ORD-0900016,2026-08-25T17:47:54,2026-09-22,19:00,Beetlejuice,Winter Garden Theatre,Balcony,Box Office,GROUP20,6,29.00,174.00,Group,paid
+ORD-0900017,2026-08-25T17:52:28,2026-08-27,19:00,The Lion King,Minskoff Theatre,Orchestra,Group Sales,,4,189.00,756.00,Group,paid
+ORD-0900018,2026-08-25T18:07:49,2026-10-02,20:00,Wicked,Gershwin Theatre,Rear Mezzanine,Mobile App,,3,83.00,249.00,Local,paid
+ORD-0900019,2026-08-25T18:16:10,2026-08-26,19:00,Aladdin,New Amsterdam Theatre,Orchestra,TKTS Booth,TKTS50,1,87.50,87.50,Tourist,paid
+ORD-0900020,2026-08-25T18:16:50,2026-09-29,19:00,Aladdin,New Amsterdam Theatre,Orchestra,TodayTix,,2,103.00,206.00,Tourist,paid
+ORD-0900021,2026-08-25T18:21:01,2026-10-09,20:00,Aladdin,New Amsterdam Theatre,Rear Mezzanine,Web,,1,62.00,62.00,Local,paid
+ORD-0900022,2026-08-25T18:21:43,2026-08-25,19:00,Beetlejuice,Winter Garden Theatre,Balcony,Web,,10,48.50,485.00,Group,paid
+ORD-0900023,2026-08-25T18:33:24,2026-10-11,15:00,Frozen,St. James Theatre,Orchestra,Mobile App,,2,132.50,265.00,Member,paid
+ORD-0900024,2026-08-25T18:45:40,2026-08-26,19:00,Moulin Rouge! The Musical!,Al Hirschfeld Theatre,Orchestra,Web,,2,287.00,574.00,Local,paid
+ORD-0900025,2026-08-25T18:54:13,2026-09-18,20:00,Hamilton,Richard Rodgers Theatre,Orchestra,Web,,2,376.00,752.00,Member,paid
+ORD-0900026,2026-08-25T18:56:28,2026-10-30,20:00,To Kill A Mockingbird,Sam S. Shubert Theatre,Front Mezzanine,Box Office,,1,248.00,248.00,Local,paid
+ORD-0900027,2026-08-25T18:58:23,2026-10-20,19:00,The Phantom of the Opera,Majestic Theatre,Orchestra,Mobile App,,6,111.00,666.00,Local,paid
+ORD-0900028,2026-08-25T18:58:53,2026-10-03,14:00,Ain't Too Proud-The Life and Times of the Temptations,Imperial Theatre,Balcony,Mobile App,RUSH25,3,25.00,75.00,Local,paid
+ORD-0900029,2026-08-25T19:01:24,2026-09-08,19:00,Ain't Too Proud-The Life and Times of the Temptations,Imperial Theatre,Balcony,Web,,3,61.50,184.50,Tourist,paid
+ORD-0900030,2026-08-25T19:04:14,2026-09-26,20:00,Wicked,Gershwin Theatre,Orchestra,Web,,2,129.50,259.00,Local,paid
+ORD-0900031,2026-08-25T19:05:29,2026-09-01,19:00,Mean Girls,August Wilson Theatre,Balcony,Mobile App,,2,52.50,105.00,Student,paid
+ORD-0900032,2026-08-25T19:07:26,2026-08-26,14:00,Mean Girls,August Wilson Theatre,Orchestra,Mobile App,,2,124.00,248.00,Tourist,paid
+ORD-0900033,2026-08-25T19:10:05,2026-09-01,19:00,To Kill A Mockingbird,Sam S. Shubert Theatre,Orchestra,Web,,2,160.50,321.00,Student,paid
+ORD-0900034,2026-08-25T19:17:14,2026-09-29,19:00,To Kill A Mockingbird,Sam S. Shubert Theatre,Orchestra,TodayTix,,2,218.00,436.00,Tourist,paid
+ORD-0900035,2026-08-25T19:38:22,2026-11-18,14:00,Wicked,Gershwin Theatre,Rear Mezzanine,Mobile App,,6,81.50,489.00,Tourist,paid
+ORD-0900036,2026-08-25T19:43:21,2026-09-04,20:00,To Kill A Mockingbird,Sam S. Shubert Theatre,Box,TodayTix,,2,275.00,550.00,Local,paid
+ORD-0900037,2026-08-25T19:44:35,2026-10-09,20:00,Moulin Rouge! The Musical!,Al Hirschfeld Theatre,Rear Mezzanine,Web,RUSH25,3,53.50,160.50,Local,paid
+ORD-0900038,2026-08-25T19:49:55,2026-10-06,19:00,Aladdin,New Amsterdam Theatre,Rear Mezzanine,Mobile App,,3,75.50,226.50,Member,paid
+ORD-0900039,2026-08-25T19:51:24,2026-12-15,19:00,The Phantom of the Opera,Majestic Theatre,Balcony,Box Office,,2,51.00,102.00,Tourist,paid

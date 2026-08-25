@@ -17,14 +17,22 @@ import { TOOLS } from '@mcp-a2ui-vega/catalog';
 import { DarkContext, GatewayContext } from './a2ui/context.ts';
 import { useDashboard } from './useDashboard.ts';
 import { demoToolCaller, httpToolCaller, mcpToolCaller } from './mcp/transports.ts';
-import type { CallTool, ToolResult } from './mcp/gateway.ts';
+import { serverOrigin, type CallTool, type ToolResult } from './mcp/gateway.ts';
 
 const APP_INFO = { name: 'A2UI Vega Dashboard', version: '0.1.0' };
 
-/** Where the standalone page should look for data, if anywhere. */
+/**
+ * Where the standalone page should look for data, if anywhere.
+ *
+ * A page served by the Worker knows which Worker it came from — the origin is
+ * written into the bundle on the way out — so opening `/app.html` with no query
+ * string talks to that server rather than looking for a demo CSV that is not
+ * there. `?server=` still overrides, and a bundle served from somewhere with no
+ * server behind it falls back to the bundled demo data.
+ */
 function standaloneSource() {
   const params = new URLSearchParams(window.location.search);
-  const server = params.get('server') ?? (window as { MCP_SERVER_URL?: string }).MCP_SERVER_URL;
+  const server = (window as { MCP_SERVER_URL?: string }).MCP_SERVER_URL ?? serverOrigin();
   return {
     server: server ?? null,
     csv: params.get('csv') ?? './demo/ticket_sales.csv',
