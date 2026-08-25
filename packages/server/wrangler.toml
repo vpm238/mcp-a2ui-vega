@@ -17,5 +17,15 @@ binding = "DATA"
 id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
 preview_id = "local-dev"
 
+# Views subscribe here for change notifications, so the dashboard does not have
+# to poll. One instance holds every connection.
+[[durable_objects.bindings]]
+name = "HUB"
+class_name = "DatasetHub"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DatasetHub"]
+
 [observability]
 enabled = true

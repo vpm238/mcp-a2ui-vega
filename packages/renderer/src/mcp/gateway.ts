@@ -2,10 +2,10 @@
  * The one place the view talks to the outside world.
  *
  * Components never call tools themselves. They ask the gateway, which owns the
- * MCP connection, the A2UI message processor and the rule that keeps the two in
- * step: anything that changes data on the server is followed by an
- * `updateDataModel` into the surface, so the charts move for the same reason
- * they would move if the agent had sent the message itself.
+ * MCP connection, the change stream, the A2UI message processor, and the rule
+ * that keeps them in step: anything that changes data on the server is followed
+ * by an `updateDataModel` into the surface, so the charts move for the same
+ * reason they would move if the agent had sent the message itself.
  */
 import type { MessageProcessor } from '@a2ui/web_core/v0_9';
 import { A2UI_VERSION, TOOLS, coerceRows, datasetPath, inferColumnTypes } from '@mcp-a2ui-vega/catalog';
@@ -39,6 +39,8 @@ export interface DatasetState {
   error?: string;
   /** When this view last pulled rows. */
   refreshedAt?: number;
+  /** True while the server is pushing change notifications to this view. */
+  live?: boolean;
 }
 
 /** Rows on the wire: either plain objects, or columnar for a smaller payload. */
@@ -81,13 +83,22 @@ export function expandRows(payload: RowsPayload): Array<Record<string, unknown>>
 type Listener = () => void;
 
 /**
- * How often a dataset is re-read once something has bound to it.
+ * How often a dataset is re-read when nothing is telling us it changed.
  *
- * Polling lives here rather than in a component because a dashboard should be
- * live whether or not whoever composed it remembered to include a status
- * badge. `DatasetStatus` tunes this; it does not own it.
+ * This is the fallback, not the plan. When the change stream is connected the
+ * server says when to look, and this drops to a slow heartbeat that exists only
+ * to catch a notification lost to a dropped connection.
  */
 const DEFAULT_POLL_SECONDS = 15;
+const SUBSCRIBED_POLL_SECONDS = 120;
+
+/** Where the change stream lives, written into the bundle by the server. */
+function serverOrigin(): string | null {
+  const injected = (window as { __MCP_SERVER_ORIGIN__?: string }).__MCP_SERVER_ORIGIN__;
+  if (injected && !injected.startsWith('@@')) return injected.replace(/\/$/, '');
+  const fromQuery = new URLSearchParams(window.location.search).get('server');
+  return fromQuery ? fromQuery.replace(/\/$/, '') : null;
+}
 
 export class Gateway {
   private readonly datasets = new Map<string, DatasetState>();
@@ -103,6 +114,9 @@ export class Gateway {
    * twice in a row leaves the second one with no data.
    */
   private readonly rowsCache = new Map<string, Array<Record<string, unknown>>>();
+  private readonly streams = new Map<string, EventSource>();
+  /** True while the server is telling us when to look. */
+  private subscribed = false;
 
   constructor(
     private readonly processor: MessageProcessor<never>,
@@ -121,9 +135,10 @@ export class Gateway {
   }
 
   /**
-   * Re-read a dataset on a timer. Called automatically the first time a dataset
-   * loads; `DatasetStatus` calls it again with the interval the agent asked
-   * for. Zero stops it.
+   * Re-read a dataset on a timer — the fallback for when the change stream is
+   * not available, and a slow heartbeat when it is. Called automatically the
+   * first time a dataset loads; `DatasetStatus` calls it again with the interval
+   * the agent asked for. Zero stops it.
    */
   setPollInterval(id: string, seconds: number = DEFAULT_POLL_SECONDS) {
     const existing = this.polls.get(id);
@@ -141,16 +156,69 @@ export class Gateway {
     this.polls.set(id, { seconds, timer });
   }
 
-  /** Stop every poll — used when the view is torn down. */
+  /**
+   * Listen for change notifications instead of asking for them.
+   *
+   * The server cannot reach a view through MCP — it answers the host, and the
+   * host talks to the view — so the view opens this connection itself, to the
+   * origin declared in the app resource's `csp.connectDomains`. What arrives is
+   * a notification, not data: the rows are still fetched through the host's
+   * tool proxy, so nothing about the data path stops being auditable.
+   */
+  watchDataset(id: string): void {
+    if (this.streams.has(id) || typeof EventSource === 'undefined') return;
+    const origin = serverOrigin();
+    if (!origin) return; // No stream available: the poll fallback covers it.
+
+    let stream: EventSource;
+    try {
+      stream = new EventSource(`${origin}/events?dataset=${encodeURIComponent(id)}`);
+    } catch {
+      return;
+    }
+    this.streams.set(id, stream);
+
+    stream.addEventListener('ready', () => {
+      this.subscribed = true;
+      // Keep a slow heartbeat rather than trusting the stream completely.
+      this.setPollInterval(id, SUBSCRIBED_POLL_SECONDS);
+      this.emit();
+    });
+
+    stream.addEventListener('dataset-changed', event => {
+      const change = JSON.parse((event as MessageEvent<string>).data) as { updatedAt?: string };
+      // Ignore an echo of what we already have.
+      if (change.updatedAt && change.updatedAt === this.datasetState(id).updatedAt) return;
+      void this.loadDataset(id, { force: true });
+    });
+
+    stream.onerror = () => {
+      // EventSource reconnects on its own; until it does, poll at the normal
+      // pace so the dashboard does not silently freeze.
+      this.subscribed = false;
+      this.setPollInterval(id, DEFAULT_POLL_SECONDS);
+      this.emit();
+    };
+  }
+
+  /** Whether change notifications are arriving, for the status badge to show. */
+  isSubscribed(): boolean {
+    return this.subscribed;
+  }
+
+  /** Stop every poll and close every stream — used when the view is torn down. */
   dispose() {
     for (const { timer } of this.polls.values()) clearInterval(timer);
+    for (const stream of this.streams.values()) stream.close();
     this.polls.clear();
+    this.streams.clear();
     this.listeners.clear();
     this.rowsCache.clear();
   }
 
   datasetState(id: string): DatasetState {
-    return this.datasets.get(id) ?? { rowCount: 0, updatedAt: '', columns: [], loading: false };
+    const state = this.datasets.get(id) ?? { rowCount: 0, updatedAt: '', columns: [], loading: false };
+    return { ...state, live: this.subscribed };
   }
 
   /** Write into every live surface's data model — dashboards here are single-surface. */
@@ -226,8 +294,12 @@ export class Gateway {
         });
 
         // Anything bound to this dataset is now live, without the dashboard
-        // having had to ask for it.
-        if (!this.polls.has(id)) this.setPollInterval(id);
+        // having had to ask for it: a change stream if the server offers one,
+        // and a poll either way.
+        this.watchDataset(id);
+        if (!this.polls.has(id)) {
+          this.setPollInterval(id, this.subscribed ? SUBSCRIBED_POLL_SECONDS : DEFAULT_POLL_SECONDS);
+        }
       } catch (error) {
         this.datasets.set(id, {
           ...this.datasetState(id),

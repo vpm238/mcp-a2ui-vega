@@ -26,7 +26,8 @@ import {
 import catalogDocument from '@mcp-a2ui-vega/catalog/catalog.json';
 import appHtml from './generated/app.html';
 import type { Env } from './env.ts';
-import { Store, distinctValues } from './store.ts';
+import { Store, distinctValues, type DatasetMeta } from './store.ts';
+import { hubFor } from './hub.ts';
 import {
   assertValidMessages,
   composeDashboard,
@@ -75,8 +76,23 @@ function problemResult(problems: string[]) {
   };
 }
 
-export function createMcpServer(env: Env): McpServer {
-  const store = new Store(env);
+/**
+ * The app is served with its own origin baked in.
+ *
+ * A view loaded from a `ui://` resource has no origin of its own to infer — the
+ * host decides where it runs — so the server, which does know, writes it into
+ * the bundle on the way out.
+ */
+export function withOrigin(html: string, origin: string): string {
+  // The token deliberately differs from the property name it is assigned to:
+  // the bundle contains `window.__MCP_SERVER_ORIGIN__`, and replacing the first
+  // match of *that* rewrites the property access into `window.https://…`, which
+  // is a syntax error and a genuinely confusing one to debug.
+  return html.replaceAll('@@MCP_SERVER_ORIGIN@@', origin);
+}
+
+export function createMcpServer(env: Env, origin?: string): McpServer {
+  const store = new Store(env, meta => notifyHub(env, meta));
   const server = new McpServer(
     { name: 'a2ui-vega-dashboard', version: '0.1.0' },
     {
@@ -105,13 +121,22 @@ export function createMcpServer(env: Env): McpServer {
       mimeType: 'text/html;profile=mcp-app',
       _meta: {
         ui: {
-          csp: { connectDomains: [], resourceDomains: [] },
+          // The one thing the app reaches for directly: a change stream, so the
+          // dashboard learns about new rows instead of asking every few seconds.
+          // Rows themselves still come through the host's tool proxy.
+          csp: { connectDomains: origin ? [origin] : [], resourceDomains: [] },
           prefersBorder: true,
         },
       },
     },
     () => ({
-      contents: [{ uri: UI_RESOURCE, mimeType: 'text/html;profile=mcp-app', text: appHtml }],
+      contents: [
+        {
+          uri: UI_RESOURCE,
+          mimeType: 'text/html;profile=mcp-app',
+          text: withOrigin(appHtml, origin ?? ''),
+        },
+      ],
     }),
   );
 
@@ -570,6 +595,27 @@ export function createMcpServer(env: Env): McpServer {
   );
 
   return server;
+}
+
+/**
+ * Tell connected views that a dataset moved.
+ *
+ * Deliberately fire-and-forget: a view that misses a notification falls back to
+ * its own slow poll, but a write that failed because nobody was listening would
+ * be a genuine bug.
+ */
+function notifyHub(env: Env, meta: DatasetMeta): void {
+  try {
+    void hubFor(env.HUB)
+      .fetch('https://hub/broadcast', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ datasetId: meta.id, updatedAt: meta.updatedAt, rowCount: meta.rowCount }),
+      })
+      .catch(() => {});
+  } catch {
+    // No hub binding (a test harness, say). The dashboard still works.
+  }
 }
 
 /** Shared by the render tool and the portable A2UI resource. */

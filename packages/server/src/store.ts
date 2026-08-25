@@ -59,7 +59,15 @@ const SEED = {
 };
 
 export class Store {
-  constructor(private readonly env: Env) {}
+  /**
+   * @param notify called after any change, so connected views can be told.
+   *   Optional: the store is useful without it, and a missing notifier should
+   *   degrade to a stale dashboard, never to a failed write.
+   */
+  constructor(
+    private readonly env: Env,
+    private readonly notify?: (meta: DatasetMeta) => void,
+  ) {}
 
   private get kv() {
     return this.env.DATA;
@@ -169,6 +177,7 @@ export class Store {
 
     await this.kv.put(DATASET_KEY(id), csv);
     await this.kv.put(META_KEY(id), JSON.stringify(meta));
+    this.notify?.(meta);
     return meta;
   }
 
@@ -197,6 +206,7 @@ export class Store {
     };
     await this.kv.put(DATASET_KEY(id), next);
     await this.kv.put(META_KEY(id), JSON.stringify(updated));
+    this.notify?.(updated);
     return updated;
   }
 

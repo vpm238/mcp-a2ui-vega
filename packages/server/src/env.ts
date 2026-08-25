@@ -9,6 +9,8 @@
 export interface Env {
   /** Datasets, their metadata, and saved widgets. */
   DATA: KVNamespace;
+  /** Holds the open connections that views listen on for data changes. */
+  HUB: DurableObjectNamespace;
   /** Optional: the public origin, used when a resource needs an absolute URL. */
   PUBLIC_ORIGIN?: string;
 }

@@ -179,9 +179,11 @@ export const AppendRowFormApi = {
 /**
  * Row count, freshness, and an optional poll — the liveness indicator.
  *
- * With `refreshSeconds` set it re-reads the dataset on a timer and writes the
- * new rows into the data model, so appends made anywhere show up without the
- * agent being asked to do anything.
+ * The renderer keeps the bound rows current on its own — it subscribes to the
+ * server's change stream, and falls back to a timer where that is unavailable —
+ * so appends made anywhere show up without the agent being asked to do
+ * anything. This component makes that visible and gives the viewer the two
+ * controls over it: refresh now, and pause.
  */
 export const DatasetStatusApi = {
   name: 'DatasetStatus',
@@ -191,7 +193,9 @@ export const DatasetStatusApi = {
     refreshSeconds: z
       .number()
       .optional()
-      .describe('Poll interval in seconds. Omitted uses the renderer default of 15; 0 starts paused.'),
+      .describe(
+        'Fallback check interval in seconds, used when the change stream is unavailable. Omitted uses the renderer default; 0 starts paused.',
+      ),
     showRefreshButton: DynamicBoolean.optional().describe('Show a button that re-reads the dataset now. Defaults to true.'),
     showAutoRefreshToggle: DynamicBoolean.optional().describe(
       'Show a switch that lets the viewer pause and resume auto-refresh. Defaults to true.',

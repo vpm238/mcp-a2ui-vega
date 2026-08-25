@@ -1,9 +1,11 @@
 /**
  * DatasetStatus — how the dashboard proves it is live.
  *
- * With `refreshSeconds` set it re-reads the dataset on a timer, which is what
- * makes an append from anywhere (the CSV drop zone, the agent, a script running
- * in a terminal) show up without anyone asking the dashboard to update.
+ * The gateway keeps the rows current by itself — a change stream from the
+ * server, or a timer where that cannot be opened — so an append from anywhere
+ * (the CSV drop zone, the agent, a script in a terminal) shows up without
+ * anyone asking the dashboard to update. This component reports which of the
+ * two is running, and hands the viewer the controls.
  */
 import { useEffect, useRef, useState } from 'react';
 import { createComponentImplementation } from '@a2ui/react/v0_9';
@@ -62,7 +64,13 @@ export const DatasetStatus = createComponentImplementation(DatasetStatusApi, ({ 
       <span className="status__text">
         {props.label ?? `${state.rowCount.toLocaleString()} rows`}
         <span className="status__meta">
-          {state.error ? ` · ${state.error}` : ` · ${state.loading ? 'refreshing…' : ago(state.refreshedAt)}`}
+          {state.error
+            ? ` · ${state.error}`
+            : state.loading
+              ? ' · refreshing…'
+              : auto && state.live
+                ? ' · live'
+                : ` · ${ago(state.refreshedAt)}`}
         </span>
       </span>
       {props.showAutoRefreshToggle !== false ? (
@@ -71,7 +79,13 @@ export const DatasetStatus = createComponentImplementation(DatasetStatusApi, ({ 
           className={`status__toggle${auto ? ' status__toggle--on' : ''}`}
           role="switch"
           aria-checked={auto}
-          title={auto ? 'Auto-refresh is on — click to pause' : 'Auto-refresh is paused — click to resume'}
+          title={
+            auto
+              ? state.live
+                ? 'Updating as the data changes — click to pause'
+                : 'Checking for changes on a timer — click to pause'
+              : 'Updates are paused — click to resume'
+          }
           onClick={() => setAuto(value => !value)}
         >
           <span className="status__toggle-track" aria-hidden="true">

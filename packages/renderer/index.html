@@ -11,6 +11,14 @@
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      The server rewrites this placeholder with its own origin on the way out,
+      because a view loaded from a ui:// resource has no origin to infer. If it
+      is still a placeholder, there is no change stream and the view polls.
+    -->
+    <script>
+      window.__MCP_SERVER_ORIGIN__ = '@@MCP_SERVER_ORIGIN@@';
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

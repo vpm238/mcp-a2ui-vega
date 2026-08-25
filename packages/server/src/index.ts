@@ -11,7 +11,10 @@ import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/
 import { TOOLS } from '@mcp-a2ui-vega/catalog';
 import appHtml from './generated/app.html';
 import type { Env } from './env.ts';
-import { createMcpServer } from './mcp.ts';
+import { createMcpServer, withOrigin } from './mcp.ts';
+import { hubFor } from './hub.ts';
+
+export { DatasetHub } from './hub.ts';
 
 const CORS = {
   'access-control-allow-origin': '*',
@@ -33,12 +36,12 @@ const json = (body: unknown, status = 200) =>
  * gets a fresh server and transport. Every tool here reads its state from KV,
  * which is what makes that safe.
  */
-async function handleMcp(request: Request, env: Env): Promise<Response> {
+async function handleMcp(request: Request, env: Env, origin: string): Promise<Response> {
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
-  const server = createMcpServer(env);
+  const server = createMcpServer(env, origin);
   await server.connect(transport);
   const response = await transport.handleRequest(request);
 
@@ -74,12 +77,22 @@ export default {
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
 
-    if (url.pathname === '/mcp') return handleMcp(request, env);
+    const origin = env.PUBLIC_ORIGIN ?? url.origin;
+
+    if (url.pathname === '/mcp') return handleMcp(request, env, origin);
+
+    // The change stream. A view holds this open and is told when a dataset
+    // moves, instead of asking over and over whether it has.
+    if (url.pathname === '/events') {
+      return hubFor(env.HUB).fetch(
+        `https://hub/subscribe?dataset=${encodeURIComponent(url.searchParams.get('dataset') ?? '')}`,
+      );
+    }
 
     // The app bundle, so the dashboard can be opened directly against a
     // deployment as well as inside a host.
     if (url.pathname === '/app.html' || url.pathname === '/app') {
-      return new Response(appHtml, {
+      return new Response(withOrigin(appHtml, origin), {
         headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300', ...CORS },
       });
     }
@@ -104,6 +117,10 @@ export default {
     }
 
     if (url.pathname === '/health') return json({ ok: true });
+
+    if (url.pathname === '/api/subscribers') {
+      return hubFor(env.HUB).fetch('https://hub/count');
+    }
 
     if (url.pathname === '/') {
       return new Response(INDEX_HTML(url.origin), {

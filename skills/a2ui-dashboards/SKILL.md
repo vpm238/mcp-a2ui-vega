@@ -19,10 +19,10 @@ the data model:
 { "data": { "path": "/datasets/ticket_sales/rows" } }
 ```
 
-The view loads the rows itself and refreshes them on a timer. Bound components
-follow. If you paste rows into a spec instead, the chart is a snapshot: the next
-appended order will not appear in it, and you will have put a dataset through
-the conversation for nothing.
+The view loads the rows itself, and reloads them when the server says they
+changed. Bound components follow. If you paste rows into a spec instead, the
+chart is a snapshot: the next appended order will not appear in it, and you will
+have put a dataset through the conversation for nothing.
 
 ## Who updates what
 
@@ -33,18 +33,21 @@ times a dashboard's *structure* changes, and they happen at conversation speed �
 when someone asks for something.
 
 **The view** writes data. Once a chart is bound to a dataset path, the view
-fetches the rows itself and issues its own `updateDataModel` locally, on a timer.
-An A2UI message does not have to come from an agent; the renderer does not care
-who produced it. So an order placed thirty seconds ago appears on the dashboard
-without you being told, without a tool call, and without a turn.
+fetches the rows itself and issues its own `updateDataModel` locally. An A2UI
+message does not have to come from an agent; the renderer does not care who
+produced it. So an order placed a second ago appears on the dashboard without
+you being told, without a tool call, and without a turn.
 
 This is why binding matters so much. A bound dashboard keeps working after the
 conversation moves on. An inlined one is a photograph.
 
-The server cannot start this. It has no channel to the view — it answers the
-host, and the host talks to the view — so the view asks. It asks cheaply: the
-poll carries the `updatedAt` it already has, and a dataset that has not moved
-answers in a few dozen bytes instead of the whole thing.
+The server starts it, but not through MCP. MCP gives a server no way to reach a
+view — it answers the host, and the host talks to the view — so the view holds
+open a change stream to the server directly, at the origin the app resource
+declares in `csp.connectDomains`. When a dataset changes the server writes one
+line down it, and the view fetches the new rows *through the host's tool proxy*,
+where a host can still see and gate them. An idle dashboard makes no requests at
+all; a change reaches it in about a second.
 
 You are told about new data only if you asked to be: give `DatasetStatus` an
 `action` and it fires when the row count changes. Leave it off unless the user
@@ -52,16 +55,17 @@ wants commentary on every sale.
 
 ## Dashboards update themselves
 
-Any dashboard you compose is live, because the view polls whatever datasets its
-components bind to — you do not have to arrange it. Two things are still worth
-doing:
+Any dashboard you compose is live, because the view subscribes to whatever
+datasets its components bind to — you do not have to arrange it. (If the stream
+cannot be opened, it falls back to polling, so a dashboard is never stale for
+want of a connection.) Two things are still worth doing:
 
 - Include a `DatasetStatus` somewhere. It shows the row count and freshness, so
   the user can see the thing is live rather than having to trust it. It also
   carries the two controls they need: **Refresh** to re-read now, and an
-  **Auto** switch to pause and resume polling — theirs to flip, whatever you
-  set. Use `refreshSeconds` for the pace (10 for a demo, 60 for something
-  long-running, 0 to start paused).
+  **Auto** switch to pause and resume live updates — theirs to flip, whatever
+  you set. `refreshSeconds` sets the fallback pace for when the stream is
+  unavailable; 0 starts paused.
 - Compute with `aggregate` rather than pasting numbers into `Text`. A tile that
   recomputes stays true; a sentence you wrote goes stale on the next order.
 
