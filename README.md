@@ -174,6 +174,16 @@ python3 -m http.server 8479                    # terminal 2, at the repo root
 node tools/e2e.mjs                             # a real browser, the real protocol
 ```
 
+To run the same suite against a deployment rather than a local worker:
+
+```bash
+node tools/relay.mjs https://your-worker.workers.dev     # terminal 3
+SERVER_URL=http://localhost:8790 node tools/e2e.mjs
+```
+
+The relay exists because a browser behind a restrictive proxy may not reach
+Cloudflare while Node can; every byte still comes from the real deployment.
+
 `tools/e2e.mjs` drives [`tools/harness.html`](tools/harness.html) — a hand-written
 MCP Apps host, ~120 lines, deliberately not sharing code with the app so a
 protocol mistake cannot pass unnoticed in both. It checks the things a type

@@ -94,6 +94,28 @@ check(
 check('a filter narrows the table', filtered.tableTotal.includes('of'), filtered.tableTotal);
 
 // 5. A chart type the catalog never named, composed at runtime and remembered.
+// Save it first, the way an agent would after the user says "keep that one" —
+// which also means this test does not depend on what is already in the store.
+const saved = await fetch(`${SERVER}/api/tools/save_widget`, {
+  method: 'POST',
+  headers: { 'content-type': 'application/json' },
+  body: JSON.stringify({
+    name: 'sales_by_hour_heatmap',
+    title: 'When people buy',
+    description: 'Orders by weekday and hour of day',
+    height: 260,
+    spec: {
+      mark: 'rect',
+      encoding: {
+        x: { field: 'ordered_at', type: 'ordinal', timeUnit: 'hours', title: 'Hour' },
+        y: { field: 'ordered_at', type: 'ordinal', timeUnit: 'day', title: null },
+        color: { aggregate: 'sum', field: 'gross', type: 'quantitative', title: 'Gross', scale: { scheme: 'blues' } },
+      },
+    },
+  }),
+}).then(r => r.json());
+check('a composed chart can be saved by name', !saved.isError, saved.content?.[0]?.text ?? JSON.stringify(saved));
+
 const withWidget = await run('heatmap', 5000);
 check('a saved widget joins the dashboard', withWidget.sections.includes('When people buy'), withWidget.sections.join(', '));
 check('the saved widget draws', withWidget.charts > rendered.charts, `${withWidget.charts} charts`);
