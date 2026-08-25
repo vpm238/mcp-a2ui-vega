@@ -122,19 +122,22 @@ The Worker is the only thing that has to be hosted. GitHub Pages gets the
 standalone demo.
 
 ```bash
-wrangler kv namespace create DATA        # put the id in packages/server/wrangler.toml
+npx wrangler login
 npm run deploy -w @mcp-a2ui-vega/server
 ```
 
-Or add these three repository secrets and push to `main` —
-[the workflow](.github/workflows/deploy.yml) does the rest, and skips the deploy
-with a warning rather than failing while they are missing:
+That creates the KV namespace if it does not exist yet, writes its id into
+`wrangler.toml`, bundles the app and the seed data, and deploys.
+
+Or add **two** repository secrets and push to `main` —
+[the workflow](.github/workflows/deploy.yml) does all of it, including creating
+the namespace, and skips the deploy with a warning rather than failing while the
+secrets are missing:
 
 | Secret | What it is |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | A token with *Edit Cloudflare Workers* permission |
+| `CLOUDFLARE_API_TOKEN` | A token from the *Edit Cloudflare Workers* template |
 | `CLOUDFLARE_ACCOUNT_ID` | Your account id, from the Workers dashboard |
-| `CLOUDFLARE_KV_NAMESPACE_ID` | The id printed by `wrangler kv namespace create DATA` |
 
 The same workflow publishes the standalone demo to GitHub Pages once Pages is
 enabled under **Settings → Pages** with source *GitHub Actions*. Until it is, the

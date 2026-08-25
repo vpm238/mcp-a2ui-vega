@@ -26,12 +26,10 @@ jobs:
         env:
           API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
         run: |
           missing=""
-          [ -n "$API_TOKEN" ]       || missing="$missing CLOUDFLARE_API_TOKEN"
-          [ -n "$ACCOUNT_ID" ]      || missing="$missing CLOUDFLARE_ACCOUNT_ID"
-          [ -n "$KV_NAMESPACE_ID" ] || missing="$missing CLOUDFLARE_KV_NAMESPACE_ID"
+          [ -n "$API_TOKEN" ]  || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$ACCOUNT_ID" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID"
           if [ -n "$missing" ]; then
             echo "::warning title=Worker not deployed::Add these repository secrets to deploy:$missing"
             echo "ready=false" >> "$GITHUB_OUTPUT"
@@ -60,18 +58,49 @@ jobs:
           npm run build:app -w @mcp-a2ui-vega/renderer
           npm run assets -w @mcp-a2ui-vega/server
 
-      - name: Point at the KV namespace
+      # Finds the namespace, or creates it on the first deploy, and writes its
+      # id into wrangler.toml. A namespace id is not a secret, so there is no
+      # reason to make somebody copy one around by hand.
+      - name: Make sure the KV namespace exists
         if: steps.guard.outputs.ready == 'true'
-        run: |
-          cd packages/server
-          sed -i "s/REPLACE_WITH_YOUR_KV_NAMESPACE_ID/${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}/" wrangler.toml
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Optional: point at a namespace this project did not create.
+          CLOUDFLARE_KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
+        run: npm run setup:kv -w @mcp-a2ui-vega/server
 
-      - uses: cloudflare/wrangler-action@v3
+      - id: worker
+        uses: cloudflare/wrangler-action@v3
         if: steps.guard.outputs.ready == 'true'
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: packages/server
+
+      # The URL is the one thing you need after a deploy, and hunting for it in
+      # wrangler's output is a chore. Put it on the run's summary page.
+      - name: Say where it went
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          URL: ${{ steps.worker.outputs.deployment-url }}
+        run: |
+          {
+            echo "## Deployed"
+            echo
+            if [ -n "$URL" ]; then
+              echo "Add this to Claude as a custom connector:"
+              echo
+              echo '```'
+              echo "$URL/mcp"
+              echo '```'
+              echo
+              echo "- The dashboard on its own: $URL/app.html?server=$URL"
+              echo "- Health check: $URL/health"
+            else
+              echo "Wrangler did not report a URL — check the deploy step's log."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
   pages:
     name: GitHub Pages
