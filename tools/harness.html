@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MCP Apps host harness</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23475569'/%3E%3Ccircle cx='8' cy='8' r='3.5' fill='white'/%3E%3C/svg%3E" />
+    <style>
+      :root { color-scheme: light dark; --line: rgba(127,127,127,.3); }
+      body { font: 14px/1.5 ui-sans-serif, system-ui, sans-serif; margin: 0; display: grid; grid-template-columns: 1fr 380px; height: 100vh; }
+      main { padding: 16px; overflow: auto; }
+      aside { border-left: 1px solid var(--line); padding: 16px; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
+      iframe { width: 100%; height: calc(100vh - 90px); border: 1px solid var(--line); border-radius: 10px; background: Canvas; }
+      h1 { font-size: 15px; margin: 0 0 10px; }
+      h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; opacity: .6; margin: 4px 0; }
+      button { font: inherit; font-size: 13px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: inherit; cursor: pointer; text-align: left; }
+      button:hover { border-color: #2563eb; color: #2563eb; }
+      #log { font: 11px/1.45 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-word; border-top: 1px solid var(--line); padding-top: 10px; flex: 1; overflow: auto; }
+      .row { display: flex; flex-direction: column; gap: 6px; }
+      code { background: rgba(127,127,127,.15); padding: 1px 4px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>MCP Apps host harness — <span id="appUrl"></span></h1>
+      <iframe id="view" title="dashboard app"></iframe>
+    </main>
+
+    <aside>
+      <h2>Agent actions</h2>
+      <div class="row">
+        <button data-scenario="render">1 · “Get me the ticket sales dashboard”</button>
+        <button data-scenario="recompose">2 · “Make sales a line chart, today in green”</button>
+        <button data-scenario="heatmap">3 · “Add a heatmap of when people buy”</button>
+        <button data-scenario="append">4 · “Add five orders” (watch it move)</button>
+        <button data-scenario="filter">5 · “Just show me Hamilton”</button>
+      </div>
+      <h2>Protocol log</h2>
+      <div id="log"></div>
+    </aside>
+
+    <script type="module">
+      /*
+       * A minimal MCP Apps host.
+       *
+       * It speaks the same JSON-RPC over postMessage that Claude does, and
+       * proxies the app's tool calls to the server over REST. Written by hand
+       * rather than with the host SDK on purpose: sharing code with the app
+       * would let a mistake in the protocol pass unnoticed in both.
+       */
+      const params = new URLSearchParams(location.search);
+      const APP = params.get('app') ?? 'http://localhost:8788/app.html';
+      const SERVER = (params.get('server') ?? 'http://localhost:8788').replace(/\/$/, '');
+
+      const frame = document.getElementById('view');
+      const logEl = document.getElementById('log');
+      document.getElementById('appUrl').textContent = APP;
+
+      const log = (direction, text) => {
+        logEl.textContent += `${direction} ${text}\n`;
+        logEl.scrollTop = logEl.scrollHeight;
+      };
+
+      const send = message => {
+        frame.contentWindow?.postMessage(message, '*');
+        if (message.method) log('→', message.method);
+      };
+
+      /** Call a tool on the server, exactly as a host would on the app's behalf. */
+      async function callServerTool(name, args) {
+        const response = await fetch(`${SERVER}/api/tools/${name}`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(args ?? {}),
+        });
+        if (!response.ok) throw new Error(`${name}: ${response.status}`);
+        return response.json();
+      }
+
+      window.addEventListener('message', async event => {
+        const message = event.data;
+        if (!message || message.jsonrpc !== '2.0') return;
+
+        if (message.method) log('←', `${message.method}${message.id !== undefined ? ` #${message.id}` : ''}`);
+
+        // Requests from the view.
+        if (message.method === 'ui/initialize') {
+          send({
+            jsonrpc: '2.0',
+            id: message.id,
+            result: {
+              // Required by the spec: the view validates this result and shows
+              // a connection error if the negotiated version is missing.
+              protocolVersion: '2026-01-26',
+              hostCapabilities: { serverTools: {}, message: {}, updateModelContext: {} },
+              hostContext: {
+                theme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+                displayMode: 'inline',
+                locale: 'en-US',
+                timeZone: 'America/New_York',
+                platform: 'web',
+                containerDimensions: { maxHeight: 2400, width: 780 },
+              },
+              hostInfo: { name: 'harness', version: '0.1.0' },
+            },
+          });
+          return;
+        }
+
+        if (message.method === 'tools/call') {
+          try {
+            const result = await callServerTool(message.params.name, message.params.arguments);
+            send({ jsonrpc: '2.0', id: message.id, result });
+          } catch (error) {
+            send({ jsonrpc: '2.0', id: message.id, error: { code: -32000, message: String(error) } });
+          }
+          return;
+        }
+
+        if (message.method === 'ui/message') {
+          // This is where an A2UI action reaches the agent.
+          log('!!', `action → agent: ${JSON.stringify(message.params.content)}`);
+          if (message.id !== undefined) send({ jsonrpc: '2.0', id: message.id, result: {} });
+          return;
+        }
+
+        if (message.method === 'ui/open-link' || message.method === 'ui/request-display-mode') {
+          if (message.id !== undefined) send({ jsonrpc: '2.0', id: message.id, result: {} });
+        }
+      });
+
+      /** Deliver a tool result to the view, the way a host does after the agent calls a tool. */
+      async function deliver(name, args) {
+        const result = await callServerTool(name, args);
+        send({ jsonrpc: '2.0', method: 'ui/notifications/tool-input', params: { arguments: args ?? {} } });
+        send({
+          jsonrpc: '2.0',
+          method: 'ui/notifications/tool-result',
+          params: {
+            content: result.content,
+            structuredContent: result.structuredContent,
+            _meta: result._meta,
+            isError: result.isError,
+          },
+        });
+        return result;
+      }
+      window.deliver = deliver;
+
+      const SCENARIOS = {
+        render: () => deliver('render_dashboard', {}),
+
+        // The follow-up that motivates the whole design: two components change,
+        // the rest of the surface — filters, scroll, table sort — does not.
+        recompose: () =>
+          deliver('update_dashboard', {
+            components: [
+              {
+                id: 'chart_timeline',
+                component: 'VegaChart',
+                data: { path: '/datasets/ticket_sales/rows' },
+                filters: [
+                  { field: 'show', op: 'in', value: { path: '/filters/show' } },
+                  { field: 'channel', op: 'in', value: { path: '/filters/channel' } },
+                  { field: 'status', op: 'eq', value: 'paid' },
+                ],
+                height: 240,
+                accent: 'green',
+                spec: {
+                  mark: { type: 'line', point: true, interpolate: 'monotone' },
+                  encoding: {
+                    x: { field: 'ordered_at', type: 'temporal', timeUnit: 'yearmonthdate', title: null },
+                    y: { field: 'gross', type: 'quantitative', aggregate: 'sum', title: 'Gross' },
+                  },
+                },
+              },
+              {
+                id: 'kpi_today',
+                component: 'KpiTile',
+                label: 'Sold today',
+                format: 'currency',
+                accent: 'green',
+                caption: 'Since midnight, New York',
+                value: {
+                  call: 'aggregate',
+                  args: {
+                    rows: { path: '/datasets/ticket_sales/rows' },
+                    op: 'sum',
+                    field: 'gross',
+                    where: [
+                      { field: 'status', op: 'eq', value: 'paid' },
+                      { field: 'ordered_at', op: 'startsWith', value: { path: '/meta/today' } },
+                    ],
+                  },
+                },
+              },
+            ],
+          }),
+
+        heatmap: () => deliver('render_dashboard', { widgets: ['sales_by_hour_heatmap'] }),
+
+        append: async () => {
+          const rows = Array.from({ length: 5 }, (_, i) => ({
+            show: ['Hamilton', 'Wicked', 'Frozen', 'Aladdin', 'Beetlejuice'][i],
+            section: 'Orchestra',
+            channel: 'Web',
+            customer_segment: 'Tourist',
+            quantity: 2,
+            unit_price: 189,
+          }));
+          const result = await callServerTool('append_rows', { rows });
+          log('!!', `appended: ${result.content?.[0]?.text ?? ''}`);
+        },
+
+        filter: () => deliver('update_dashboard', { dataModel: [{ path: '/filters/show', value: ['Hamilton'] }] }),
+      };
+
+      for (const button of document.querySelectorAll('[data-scenario]')) {
+        button.addEventListener('click', () => {
+          const name = button.dataset.scenario;
+          log('##', name);
+          SCENARIOS[name]().catch(error => log('!!', `failed: ${error}`));
+        });
+      }
+
+      frame.src = APP;
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1370 @@
+[
+  {
+    "show": "Wicked",
+    "theatre": "Gershwin Theatre",
+    "seatsInTheatre": 1807,
+    "avgTicketPrice": 110.61,
+    "topTicketPrice": 240,
+    "medianCapacity": 0.9711,
+    "weekly": [
+      {
+        "capacity": 0.9005,
+        "avgPrice": 116.07
+      },
+      {
+        "capacity": 0.971,
+        "avgPrice": 96.26
+      },
+      {
+        "capacity": 0.9744,
+        "avgPrice": 99.74
+      },
+      {
+        "capacity": 0.8187,
+        "avgPrice": 110.54
+      },
+      {
+        "capacity": 0.8719,
+        "avgPrice": 109.19
+      },
+      {
+        "capacity": 0.8336,
+        "avgPrice": 108.53
+      },
+      {
+        "capacity": 0.9799,
+        "avgPrice": 121.84
+      },
+      {
+        "capacity": 0.9893,
+        "avgPrice": 117.32
+      },
+      {
+        "capacity": 0.9562,
+        "avgPrice": 107.52
+      },
+      {
+        "capacity": 0.9332,
+        "avgPrice": 106.87
+      },
+      {
+        "capacity": 0.975,
+        "avgPrice": 114.37
+      },
+      {
+        "capacity": 0.83,
+        "avgPrice": 110.37
+      },
+      {
+        "capacity": 0.9373,
+        "avgPrice": 117
+      },
+      {
+        "capacity": 0.995,
+        "avgPrice": 153.01
+      },
+      {
+        "capacity": 0.9725,
+        "avgPrice": 132.85
+      },
+      {
+        "capacity": 0.9799,
+        "avgPrice": 133.94
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 155.88
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 185.64
+      },
+      {
+        "capacity": 0.9968,
+        "avgPrice": 143.25
+      },
+      {
+        "capacity": 0.9191,
+        "avgPrice": 100.69
+      },
+      {
+        "capacity": 0.9411,
+        "avgPrice": 108.27
+      },
+      {
+        "capacity": 0.9889,
+        "avgPrice": 102.79
+      },
+      {
+        "capacity": 0.9959,
+        "avgPrice": 90.42
+      },
+      {
+        "capacity": 0.9712,
+        "avgPrice": 94.23
+      },
+      {
+        "capacity": 0.9493,
+        "avgPrice": 111.41
+      },
+      {
+        "capacity": 0.9701,
+        "avgPrice": 110.67
+      }
+    ]
+  },
+  {
+    "show": "Aladdin",
+    "theatre": "New Amsterdam Theatre",
+    "seatsInTheatre": 1727,
+    "avgTicketPrice": 93.81,
+    "topTicketPrice": 227.5,
+    "medianCapacity": 0.9597,
+    "weekly": [
+      {
+        "capacity": 0.9619,
+        "avgPrice": 104.99
+      },
+      {
+        "capacity": 0.9094,
+        "avgPrice": 89.71
+      },
+      {
+        "capacity": 0.9555,
+        "avgPrice": 92.14
+      },
+      {
+        "capacity": 0.8586,
+        "avgPrice": 91.13
+      },
+      {
+        "capacity": 0.9522,
+        "avgPrice": 85.57
+      },
+      {
+        "capacity": 0.9637,
+        "avgPrice": 90.4
+      },
+      {
+        "capacity": 0.9937,
+        "avgPrice": 102.68
+      },
+      {
+        "capacity": 0.9858,
+        "avgPrice": 98.75
+      },
+      {
+        "capacity": 0.9572,
+        "avgPrice": 93.97
+      },
+      {
+        "capacity": 0.9684,
+        "avgPrice": 94.18
+      },
+      {
+        "capacity": 0.9624,
+        "avgPrice": 93.64
+      },
+      {
+        "capacity": 0.9242,
+        "avgPrice": 87.24
+      },
+      {
+        "capacity": 0.9472,
+        "avgPrice": 92.88
+      },
+      {
+        "capacity": 0.9691,
+        "avgPrice": 129.75
+      },
+      {
+        "capacity": 0.9716,
+        "avgPrice": 111.63
+      },
+      {
+        "capacity": 0.9424,
+        "avgPrice": 105.43
+      },
+      {
+        "capacity": 0.9682,
+        "avgPrice": 118.97
+      },
+      {
+        "capacity": 0.989,
+        "avgPrice": 160.19
+      },
+      {
+        "capacity": 0.986,
+        "avgPrice": 132.66
+      },
+      {
+        "capacity": 0.9576,
+        "avgPrice": 87.67
+      },
+      {
+        "capacity": 0.9425,
+        "avgPrice": 88.1
+      },
+      {
+        "capacity": 0.9523,
+        "avgPrice": 85.05
+      },
+      {
+        "capacity": 0.9422,
+        "avgPrice": 81.41
+      },
+      {
+        "capacity": 0.9464,
+        "avgPrice": 82.32
+      },
+      {
+        "capacity": 0.9828,
+        "avgPrice": 95.53
+      },
+      {
+        "capacity": 0.9885,
+        "avgPrice": 97.58
+      }
+    ]
+  },
+  {
+    "show": "The Lion King",
+    "theatre": "Minskoff Theatre",
+    "seatsInTheatre": 1696,
+    "avgTicketPrice": 146.35,
+    "topTicketPrice": 237,
+    "medianCapacity": 0.9475,
+    "weekly": [
+      {
+        "capacity": 0.9284,
+        "avgPrice": 161.68
+      },
+      {
+        "capacity": 0.8737,
+        "avgPrice": 141.58
+      },
+      {
+        "capacity": 0.9458,
+        "avgPrice": 138.05
+      },
+      {
+        "capacity": 0.9701,
+        "avgPrice": 140.31
+      },
+      {
+        "capacity": 0.9929,
+        "avgPrice": 136.12
+      },
+      {
+        "capacity": 0.98,
+        "avgPrice": 146.6
+      },
+      {
+        "capacity": 0.9864,
+        "avgPrice": 167.55
+      },
+      {
+        "capacity": 0.9809,
+        "avgPrice": 160.32
+      },
+      {
+        "capacity": 0.9525,
+        "avgPrice": 154.68
+      },
+      {
+        "capacity": 0.9665,
+        "avgPrice": 150.1
+      },
+      {
+        "capacity": 0.9693,
+        "avgPrice": 146.1
+      },
+      {
+        "capacity": 0.9221,
+        "avgPrice": 132.36
+      },
+      {
+        "capacity": 0.9196,
+        "avgPrice": 148.02
+      },
+      {
+        "capacity": 0.9404,
+        "avgPrice": 192.12
+      },
+      {
+        "capacity": 0.9312,
+        "avgPrice": 172.55
+      },
+      {
+        "capacity": 0.9446,
+        "avgPrice": 162.63
+      },
+      {
+        "capacity": 0.9491,
+        "avgPrice": 175.05
+      },
+      {
+        "capacity": 0.9976,
+        "avgPrice": 228.82
+      },
+      {
+        "capacity": 0.9899,
+        "avgPrice": 185.62
+      },
+      {
+        "capacity": 0.9402,
+        "avgPrice": 126.22
+      },
+      {
+        "capacity": 0.9437,
+        "avgPrice": 131.81
+      },
+      {
+        "capacity": 0.9548,
+        "avgPrice": 124.68
+      },
+      {
+        "capacity": 0.9112,
+        "avgPrice": 113.66
+      },
+      {
+        "capacity": 0.9411,
+        "avgPrice": 111.14
+      },
+      {
+        "capacity": 0.9422,
+        "avgPrice": 130.91
+      },
+      {
+        "capacity": 0.9654,
+        "avgPrice": 140.55
+      }
+    ]
+  },
+  {
+    "show": "Frozen",
+    "theatre": "St. James Theatre",
+    "seatsInTheatre": 1684,
+    "avgTicketPrice": 83.05,
+    "topTicketPrice": 240,
+    "medianCapacity": 0.9448,
+    "weekly": [
+      {
+        "capacity": 0.9529,
+        "avgPrice": 86.05
+      },
+      {
+        "capacity": 0.8726,
+        "avgPrice": 78.88
+      },
+      {
+        "capacity": 0.8967,
+        "avgPrice": 78.98
+      },
+      {
+        "capacity": 0.8357,
+        "avgPrice": 71.11
+      },
+      {
+        "capacity": 0.7841,
+        "avgPrice": 79.24
+      },
+      {
+        "capacity": 0.8858,
+        "avgPrice": 81.11
+      },
+      {
+        "capacity": 0.9881,
+        "avgPrice": 85.69
+      },
+      {
+        "capacity": 0.9743,
+        "avgPrice": 82.01
+      },
+      {
+        "capacity": 0.9091,
+        "avgPrice": 77.45
+      },
+      {
+        "capacity": 0.9499,
+        "avgPrice": 75.79
+      },
+      {
+        "capacity": 0.9557,
+        "avgPrice": 84.09
+      },
+      {
+        "capacity": 0.8875,
+        "avgPrice": 80.16
+      },
+      {
+        "capacity": 0.9182,
+        "avgPrice": 88.92
+      },
+      {
+        "capacity": 0.9877,
+        "avgPrice": 123.14
+      },
+      {
+        "capacity": 0.9912,
+        "avgPrice": 89.6
+      },
+      {
+        "capacity": 0.961,
+        "avgPrice": 90.36
+      },
+      {
+        "capacity": 0.9887,
+        "avgPrice": 93.89
+      },
+      {
+        "capacity": 0.9998,
+        "avgPrice": 144.29
+      },
+      {
+        "capacity": 0.9986,
+        "avgPrice": 103.9
+      },
+      {
+        "capacity": 0.9538,
+        "avgPrice": 81.9
+      },
+      {
+        "capacity": 0.907,
+        "avgPrice": 86
+      },
+      {
+        "capacity": 0.9397,
+        "avgPrice": 79.14
+      },
+      {
+        "capacity": 0.917,
+        "avgPrice": 78.73
+      },
+      {
+        "capacity": 0.9334,
+        "avgPrice": 79.11
+      },
+      {
+        "capacity": 0.8983,
+        "avgPrice": 88.8
+      },
+      {
+        "capacity": 0.9875,
+        "avgPrice": 87.24
+      }
+    ]
+  },
+  {
+    "show": "Harry Potter and the Cursed Child, Parts One and Two",
+    "theatre": "Lyric Theatre",
+    "seatsInTheatre": 1622,
+    "avgTicketPrice": 84.82,
+    "topTicketPrice": 296.5,
+    "medianCapacity": 1,
+    "weekly": [
+      {
+        "capacity": 1,
+        "avgPrice": 100.68
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 85.06
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 84.42
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 78.45
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 85.36
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 77.17
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 96.59
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 80.01
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 77.2
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 74.36
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 88.56
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 72.54
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 71.75
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 112.29
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 81.62
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 85.71
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 106.66
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 157.93
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 123.47
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 88.87
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 90.71
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 78.51
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 76.55
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 78.01
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 89.08
+      },
+      {
+        "capacity": 0.9958,
+        "avgPrice": 84.58
+      }
+    ]
+  },
+  {
+    "show": "The Phantom of the Opera",
+    "theatre": "Majestic Theatre",
+    "seatsInTheatre": 1605,
+    "avgTicketPrice": 88.16,
+    "topTicketPrice": 213,
+    "medianCapacity": 0.7963,
+    "weekly": [
+      {
+        "capacity": 0.8838,
+        "avgPrice": 88.79
+      },
+      {
+        "capacity": 0.7969,
+        "avgPrice": 80.99
+      },
+      {
+        "capacity": 0.8805,
+        "avgPrice": 80.51
+      },
+      {
+        "capacity": 0.747,
+        "avgPrice": 86.4
+      },
+      {
+        "capacity": 0.7672,
+        "avgPrice": 87.36
+      },
+      {
+        "capacity": 0.8168,
+        "avgPrice": 88.33
+      },
+      {
+        "capacity": 0.9727,
+        "avgPrice": 92.43
+      },
+      {
+        "capacity": 0.8722,
+        "avgPrice": 88.32
+      },
+      {
+        "capacity": 0.7889,
+        "avgPrice": 86.99
+      },
+      {
+        "capacity": 0.7507,
+        "avgPrice": 85.32
+      },
+      {
+        "capacity": 0.8357,
+        "avgPrice": 88.76
+      },
+      {
+        "capacity": 0.7027,
+        "avgPrice": 85.14
+      },
+      {
+        "capacity": 0.6364,
+        "avgPrice": 87.72
+      },
+      {
+        "capacity": 0.8477,
+        "avgPrice": 117.7
+      },
+      {
+        "capacity": 0.7956,
+        "avgPrice": 93.91
+      },
+      {
+        "capacity": 0.7823,
+        "avgPrice": 96.48
+      },
+      {
+        "capacity": 0.841,
+        "avgPrice": 108.04
+      },
+      {
+        "capacity": 0.9938,
+        "avgPrice": 142.04
+      },
+      {
+        "capacity": 0.9939,
+        "avgPrice": 123.21
+      },
+      {
+        "capacity": 0.7097,
+        "avgPrice": 88.01
+      },
+      {
+        "capacity": 0.7688,
+        "avgPrice": 89.24
+      },
+      {
+        "capacity": 0.7685,
+        "avgPrice": 78.35
+      },
+      {
+        "capacity": 0.7716,
+        "avgPrice": 74.82
+      },
+      {
+        "capacity": 0.7815,
+        "avgPrice": 73.16
+      },
+      {
+        "capacity": 0.8229,
+        "avgPrice": 91.99
+      },
+      {
+        "capacity": 0.8323,
+        "avgPrice": 78.63
+      }
+    ]
+  },
+  {
+    "show": "Beetlejuice",
+    "theatre": "Winter Garden Theatre",
+    "seatsInTheatre": 1493,
+    "avgTicketPrice": 97.56,
+    "topTicketPrice": 323,
+    "medianCapacity": 0.9632,
+    "weekly": [
+      {
+        "capacity": 0.9215,
+        "avgPrice": 91.02
+      },
+      {
+        "capacity": 0.8147,
+        "avgPrice": 85.74
+      },
+      {
+        "capacity": 0.9042,
+        "avgPrice": 82.33
+      },
+      {
+        "capacity": 0.881,
+        "avgPrice": 81.39
+      },
+      {
+        "capacity": 0.8405,
+        "avgPrice": 89.59
+      },
+      {
+        "capacity": 0.8675,
+        "avgPrice": 89.34
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 103.7
+      },
+      {
+        "capacity": 0.9821,
+        "avgPrice": 94.15
+      },
+      {
+        "capacity": 0.9422,
+        "avgPrice": 95.94
+      },
+      {
+        "capacity": 0.9642,
+        "avgPrice": 93.41
+      },
+      {
+        "capacity": 0.9686,
+        "avgPrice": 104.83
+      },
+      {
+        "capacity": 0.8369,
+        "avgPrice": 96.56
+      },
+      {
+        "capacity": 0.8166,
+        "avgPrice": 99
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 131.37
+      },
+      {
+        "capacity": 0.9145,
+        "avgPrice": 98.55
+      },
+      {
+        "capacity": 0.9767,
+        "avgPrice": 101.4
+      },
+      {
+        "capacity": 0.9815,
+        "avgPrice": 120.91
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 158.44
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 134.44
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 102.72
+      },
+      {
+        "capacity": 0.9805,
+        "avgPrice": 115.9
+      },
+      {
+        "capacity": 0.9963,
+        "avgPrice": 96.28
+      },
+      {
+        "capacity": 0.9622,
+        "avgPrice": 91.71
+      },
+      {
+        "capacity": 0.9622,
+        "avgPrice": 90.85
+      },
+      {
+        "capacity": 0.9576,
+        "avgPrice": 116.95
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 108.57
+      }
+    ]
+  },
+  {
+    "show": "To Kill A Mockingbird",
+    "theatre": "Sam S. Shubert Theatre",
+    "seatsInTheatre": 1435,
+    "avgTicketPrice": 165.34,
+    "topTicketPrice": 497,
+    "medianCapacity": 1,
+    "weekly": [
+      {
+        "capacity": 1,
+        "avgPrice": 168.78
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 164.6
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 168.92
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 179.34
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 179.34
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 182.81
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 192.24
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 188.01
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 189.86
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 192.38
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 166.08
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 158.57
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 144.91
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 174.75
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 167.48
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 162.59
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 159.1
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 179.44
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 148.88
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 131.5
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 141.18
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 129.38
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 118.26
+      },
+      {
+        "capacity": 0.9767,
+        "avgPrice": 121.01
+      },
+      {
+        "capacity": 0.9889,
+        "avgPrice": 137.48
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 123.28
+      }
+    ]
+  },
+  {
+    "show": "Ain't Too Proud-The Life and Times of the Temptations",
+    "theatre": "Imperial Theatre",
+    "seatsInTheatre": 1424,
+    "avgTicketPrice": 136.3,
+    "topTicketPrice": 297,
+    "medianCapacity": 0.9567,
+    "weekly": [
+      {
+        "capacity": 0.999,
+        "avgPrice": 138.05
+      },
+      {
+        "capacity": 0.9821,
+        "avgPrice": 127.01
+      },
+      {
+        "capacity": 0.9896,
+        "avgPrice": 134.14
+      },
+      {
+        "capacity": 0.9844,
+        "avgPrice": 136.38
+      },
+      {
+        "capacity": 0.966,
+        "avgPrice": 135.09
+      },
+      {
+        "capacity": 0.9591,
+        "avgPrice": 137.15
+      },
+      {
+        "capacity": 0.9976,
+        "avgPrice": 139.54
+      },
+      {
+        "capacity": 0.9659,
+        "avgPrice": 140.62
+      },
+      {
+        "capacity": 0.9728,
+        "avgPrice": 138.13
+      },
+      {
+        "capacity": 0.9688,
+        "avgPrice": 124.38
+      },
+      {
+        "capacity": 0.95,
+        "avgPrice": 140.42
+      },
+      {
+        "capacity": 0.928,
+        "avgPrice": 136.21
+      },
+      {
+        "capacity": 0.9342,
+        "avgPrice": 133.14
+      },
+      {
+        "capacity": 0.9542,
+        "avgPrice": 146.86
+      },
+      {
+        "capacity": 0.9734,
+        "avgPrice": 154.21
+      },
+      {
+        "capacity": 0.9831,
+        "avgPrice": 149.28
+      },
+      {
+        "capacity": 0.9517,
+        "avgPrice": 141.36
+      },
+      {
+        "capacity": 0.9924,
+        "avgPrice": 164.97
+      },
+      {
+        "capacity": 0.86,
+        "avgPrice": 136.77
+      },
+      {
+        "capacity": 0.8926,
+        "avgPrice": 124.6
+      },
+      {
+        "capacity": 0.9463,
+        "avgPrice": 126.08
+      },
+      {
+        "capacity": 0.8936,
+        "avgPrice": 123.27
+      },
+      {
+        "capacity": 0.8949,
+        "avgPrice": 113.19
+      },
+      {
+        "capacity": 0.9023,
+        "avgPrice": 116.73
+      },
+      {
+        "capacity": 0.9478,
+        "avgPrice": 124.05
+      },
+      {
+        "capacity": 0.9183,
+        "avgPrice": 113.55
+      }
+    ]
+  },
+  {
+    "show": "Hamilton",
+    "theatre": "Richard Rodgers Theatre",
+    "seatsInTheatre": 1324,
+    "avgTicketPrice": 270.41,
+    "topTicketPrice": 847,
+    "medianCapacity": 1,
+    "weekly": [
+      {
+        "capacity": 1,
+        "avgPrice": 280.16
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 270.71
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 270.11
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 276.56
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 278.07
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 278.35
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 287.48
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 259.75
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 275.81
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 224.35
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 287.06
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 257.72
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 247.22
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 314.22
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 284.53
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 258.05
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 297.87
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 339.03
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 296.96
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 256.99
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 253.26
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 248.7
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 248.89
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 250.34
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 237.78
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 257.03
+      }
+    ]
+  },
+  {
+    "show": "Moulin Rouge! The Musical!",
+    "theatre": "Al Hirschfeld Theatre",
+    "seatsInTheatre": 1302,
+    "avgTicketPrice": 205.59,
+    "topTicketPrice": 499,
+    "medianCapacity": 1,
+    "weekly": [
+      {
+        "capacity": 1,
+        "avgPrice": 203.44
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 199.78
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 208.11
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 205.49
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 205.7
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 207.44
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 209.87
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 213.19
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 209.45
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 207.74
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 211.25
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 205.96
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 196.7
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 224.49
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 222.82
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 221.21
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 203.09
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 231.34
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 199.23
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 177.9
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 170.86
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 158.17
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 154.45
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 156.52
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 182.57
+      },
+      {
+        "capacity": 1,
+        "avgPrice": 160.49
+      }
+    ]
+  },
+  {
+    "show": "Mean Girls",
+    "theatre": "August Wilson Theatre",
+    "seatsInTheatre": 1225,
+    "avgTicketPrice": 98.25,
+    "topTicketPrice": 249.5,
+    "medianCapacity": 0.946,
+    "weekly": [
+      {
+        "capacity": 0.9919,
+        "avgPrice": 96.08
+      },
+      {
+        "capacity": 0.8639,
+        "avgPrice": 85.68
+      },
+      {
+        "capacity": 0.9052,
+        "avgPrice": 85.25
+      },
+      {
+        "capacity": 0.8588,
+        "avgPrice": 84.92
+      },
+      {
+        "capacity": 0.8389,
+        "avgPrice": 85.22
+      },
+      {
+        "capacity": 0.8782,
+        "avgPrice": 88.49
+      },
+      {
+        "capacity": 0.9967,
+        "avgPrice": 109.3
+      },
+      {
+        "capacity": 0.9558,
+        "avgPrice": 100.42
+      },
+      {
+        "capacity": 0.9043,
+        "avgPrice": 89.21
+      },
+      {
+        "capacity": 0.8649,
+        "avgPrice": 90.71
+      },
+      {
+        "capacity": 0.9634,
+        "avgPrice": 103.18
+      },
+      {
+        "capacity": 0.8452,
+        "avgPrice": 94.5
+      },
+      {
+        "capacity": 0.8368,
+        "avgPrice": 105.29
+      },
+      {
+        "capacity": 0.8345,
+        "avgPrice": 150.27
+      },
+      {
+        "capacity": 0.9385,
+        "avgPrice": 112.98
+      },
+      {
+        "capacity": 0.9589,
+        "avgPrice": 110.5
+      },
+      {
+        "capacity": 0.9553,
+        "avgPrice": 124.89
+      },
+      {
+        "capacity": 0.9887,
+        "avgPrice": 163.76
+      },
+      {
+        "capacity": 0.9945,
+        "avgPrice": 133.11
+      },
+      {
+        "capacity": 0.9482,
+        "avgPrice": 95.87
+      },
+      {
+        "capacity": 0.954,
+        "avgPrice": 103.93
+      },
+      {
+        "capacity": 0.9438,
+        "avgPrice": 92.62
+      },
+      {
+        "capacity": 0.9197,
+        "avgPrice": 84.17
+      },
+      {
+        "capacity": 0.9487,
+        "avgPrice": 89.67
+      },
+      {
+        "capacity": 0.9563,
+        "avgPrice": 107.48
+      },
+      {
+        "capacity": 0.9934,
+        "avgPrice": 101.19
+      }
+    ]
+  }
+]

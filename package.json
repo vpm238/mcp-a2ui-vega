@@ -1,0 +1,30 @@
+{
+  "name": "mcp-a2ui-vega",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An MCP App that renders agent-composed dashboards: an A2UI renderer with a Vega-Lite chart widget catalog.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/catalog",
+    "packages/renderer",
+    "packages/server"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build -w @mcp-a2ui-vega/catalog && npm run build -w @mcp-a2ui-vega/renderer && npm run build:app -w @mcp-a2ui-vega/renderer && npm run build -w @mcp-a2ui-vega/server",
+    "build:renderer": "npm run build -w @mcp-a2ui-vega/renderer",
+    "dev:server": "npm run dev -w @mcp-a2ui-vega/server",
+    "deploy": "npm run deploy -w @mcp-a2ui-vega/server",
+    "data:build": "npm run build -w @mcp-a2ui-vega/catalog && node tools/build-dataset.mjs",
+    "data:append": "node tools/append-sales.mjs",
+    "test": "npm run build -w @mcp-a2ui-vega/catalog && node --test tools/*.test.mjs",
+    "typecheck": "tsc -b packages/catalog packages/renderer packages/server",
+    "e2e": "node tools/e2e.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1"
+  }
+}

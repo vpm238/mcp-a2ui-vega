@@ -1,0 +1,21 @@
+name = "a2ui-vega-dashboard"
+main = "src/index.ts"
+compatibility_date = "2026-01-15"
+compatibility_flags = ["nodejs_compat"]
+
+# The dataset CSV and the built app are bundled as text modules, so a fresh
+# deployment has something to show without a seeding step.
+[[rules]]
+type = "Text"
+globs = ["**/*.csv", "**/*.html"]
+fallthrough = true
+
+# Datasets, their metadata, and saved widgets.
+# Create with: wrangler kv namespace create DATA
+[[kv_namespaces]]
+binding = "DATA"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+preview_id = "local-dev"
+
+[observability]
+enabled = true

@@ -1,0 +1,34 @@
+{
+  "name": "@mcp-a2ui-vega/renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The MCP App view: an A2UI renderer whose catalog draws Vega-Lite charts.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build && node scripts/copy-demo-assets.mjs",
+    "preview": "vite preview",
+    "build:app": "tsc --noEmit && SINGLE_FILE=1 vite build"
+  },
+  "dependencies": {
+    "@a2ui/react": "^0.10.2",
+    "@a2ui/web_core": "^0.10.6",
+    "@mcp-a2ui-vega/catalog": "*",
+    "@modelcontextprotocol/ext-apps": "^1.7.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "vega": "^6.4.0",
+    "vega-embed": "^7.1.0",
+    "vega-lite": "^6.4.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.2.2",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

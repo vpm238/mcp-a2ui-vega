@@ -1,0 +1,44 @@
+{
+  "dataset": "ticket_sales",
+  "generatedFrom": {
+    "source": "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-04-28/grosses.csv",
+    "sourceDescription": "Weekly Broadway grosses (Playbill), 1985-2020, via the TidyTuesday project. Real shows, theatres, seat counts, capacity and ticket prices.",
+    "seasonWindow": [
+      "2019-09-01",
+      "2020-02-23"
+    ]
+  },
+  "modelled": "Individual orders are modelled, not real: the source data is weekly and aggregate. Each show plays its real eight-performance week at its real weekly capacity; this platform sells `share` of the house and splits those seats into orders across sections, channels, promos and party sizes, priced off the show's real average ticket price.",
+  "parameters": {
+    "end": "2026-08-25",
+    "days": 90,
+    "shows": 12,
+    "share": 0.02,
+    "seed": 20260825,
+    "timezone": "America/New_York"
+  },
+  "columns": [
+    "order_id",
+    "ordered_at",
+    "event_date",
+    "event_time",
+    "show",
+    "theatre",
+    "section",
+    "channel",
+    "promo_code",
+    "quantity",
+    "unit_price",
+    "gross",
+    "customer_segment",
+    "status"
+  ],
+  "window": {
+    "from": "2026-05-27T06:16:44",
+    "to": "2026-08-24T23:58:21"
+  },
+  "rows": 11821,
+  "tickets": 34250,
+  "gross": 4595004.64,
+  "avgTicketPrice": 134.16
+}

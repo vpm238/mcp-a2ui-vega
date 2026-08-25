@@ -1,0 +1,25 @@
+{
+  "name": "@mcp-a2ui-vega/catalog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "The A2UI component catalog this app renders: Vega-Lite charts, KPI tiles, tables and CSV intake.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./catalog.json": "./dist/catalog.json"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/emit-catalog.mjs",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@a2ui/web_core": "^0.10.6",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

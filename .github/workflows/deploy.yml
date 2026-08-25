@@ -1,0 +1,81 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  worker:
+    name: Cloudflare Worker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The catalog document, the single-file app and the seed CSV are all
+      # bundled into the Worker, so the build has to run before the deploy.
+      - name: Build
+        run: |
+          npm run build -w @mcp-a2ui-vega/catalog
+          npm run build:app -w @mcp-a2ui-vega/renderer
+          npm run assets -w @mcp-a2ui-vega/server
+
+      - name: Point at the KV namespace
+        run: |
+          cd packages/server
+          sed -i "s/REPLACE_WITH_YOUR_KV_NAMESPACE_ID/${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}/" wrangler.toml
+
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: packages/server
+
+  pages:
+    name: GitHub Pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # The standalone demo: the same bundle, running against the committed CSV
+      # with no server at all.
+      - name: Build the site
+        run: |
+          npm run build -w @mcp-a2ui-vega/catalog
+          npm run build -w @mcp-a2ui-vega/renderer
+          cp packages/catalog/dist/catalog.json packages/renderer/dist/site/catalog.json
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: packages/renderer/dist/site
+      - id: deploy
+        uses: actions/deploy-pages@v4
