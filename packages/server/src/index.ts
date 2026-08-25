@@ -36,12 +36,12 @@ const json = (body: unknown, status = 200) =>
  * gets a fresh server and transport. Every tool here reads its state from KV,
  * which is what makes that safe.
  */
-async function handleMcp(request: Request, env: Env, origin: string): Promise<Response> {
+async function handleMcp(request: Request, env: Env, origin: string, ctx: ExecutionContext): Promise<Response> {
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
-  const server = createMcpServer(env, origin);
+  const server = createMcpServer(env, origin, ctx);
   await server.connect(transport);
   const response = await transport.handleRequest(request);
 
@@ -51,7 +51,7 @@ async function handleMcp(request: Request, env: Env, origin: string): Promise<Re
 }
 
 /** Call a tool without speaking MCP, by speaking MCP internally. */
-async function callTool(env: Env, name: string, args: unknown): Promise<Response> {
+async function callTool(env: Env, name: string, args: unknown, ctx: ExecutionContext): Promise<Response> {
   const rpc = new Request('https://internal/mcp', {
     method: 'POST',
     headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
@@ -62,7 +62,7 @@ async function callTool(env: Env, name: string, args: unknown): Promise<Response
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
-  const server = createMcpServer(env);
+  const server = createMcpServer(env, undefined, ctx);
   await server.connect(transport);
 
   const response = await transport.handleRequest(rpc);
@@ -72,14 +72,14 @@ async function callTool(env: Env, name: string, args: unknown): Promise<Response
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
 
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
 
     const origin = env.PUBLIC_ORIGIN ?? url.origin;
 
-    if (url.pathname === '/mcp') return handleMcp(request, env, origin);
+    if (url.pathname === '/mcp') return handleMcp(request, env, origin, ctx);
 
     // The change stream. A view holds this open and is told when a dataset
     // moves, instead of asking over and over whether it has.
@@ -100,14 +100,14 @@ export default {
     if (url.pathname.startsWith('/api/tools/') && request.method === 'POST') {
       const name = url.pathname.slice('/api/tools/'.length);
       const args = await request.json().catch(() => ({}));
-      return callTool(env, name, args);
+      return callTool(env, name, args, ctx);
     }
 
     // A convenience shape for scripts: POST rows straight at a dataset.
     const appendMatch = url.pathname.match(/^\/api\/datasets\/([^/]+)\/rows$/);
     if (appendMatch && request.method === 'POST') {
       const body = (await request.json().catch(() => ({}))) as { rows?: unknown };
-      const result = await callTool(env, TOOLS.appendRows, { datasetId: appendMatch[1], rows: body.rows ?? [] });
+      const result = await callTool(env, TOOLS.appendRows, { datasetId: appendMatch[1], rows: body.rows ?? [] }, ctx);
       const payload = (await result.json()) as { structuredContent?: { rowCount?: number; rowsAdded?: number } };
       return json({
         dataset: appendMatch[1],

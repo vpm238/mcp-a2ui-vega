@@ -91,8 +91,8 @@ export function withOrigin(html: string, origin: string): string {
   return html.replaceAll('@@MCP_SERVER_ORIGIN@@', origin);
 }
 
-export function createMcpServer(env: Env, origin?: string): McpServer {
-  const store = new Store(env, meta => notifyHub(env, meta));
+export function createMcpServer(env: Env, origin?: string, ctx?: ExecutionContext): McpServer {
+  const store = new Store(env, meta => notifyHub(env, meta, ctx));
   const server = new McpServer(
     { name: 'a2ui-vega-dashboard', version: '0.1.0' },
     {
@@ -600,19 +600,25 @@ export function createMcpServer(env: Env, origin?: string): McpServer {
 /**
  * Tell connected views that a dataset moved.
  *
- * Deliberately fire-and-forget: a view that misses a notification falls back to
- * its own slow poll, but a write that failed because nobody was listening would
- * be a genuine bug.
+ * Handed to `waitUntil` rather than left floating: a Worker cancels pending
+ * promises the moment its response is returned, so a bare `void fetch(...)`
+ * survives `wrangler dev` and is silently dropped in production — the stream
+ * connects, the append succeeds, and the notification never arrives.
+ *
+ * Still fire-and-forget in spirit: a view that misses one falls back to its own
+ * poll, whereas a write that failed because nobody was listening would be a
+ * genuine bug.
  */
-function notifyHub(env: Env, meta: DatasetMeta): void {
+function notifyHub(env: Env, meta: DatasetMeta, ctx?: ExecutionContext): void {
   try {
-    void hubFor(env.HUB)
+    const broadcast = hubFor(env.HUB)
       .fetch('https://hub/broadcast', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ datasetId: meta.id, updatedAt: meta.updatedAt, rowCount: meta.rowCount }),
       })
       .catch(() => {});
+    if (ctx) ctx.waitUntil(broadcast);
   } catch {
     // No hub binding (a test harness, say). The dashboard still works.
   }
