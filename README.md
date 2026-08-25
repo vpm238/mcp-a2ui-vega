@@ -126,14 +126,18 @@ wrangler kv namespace create DATA        # put the id in packages/server/wrangle
 npm run deploy -w @mcp-a2ui-vega/server
 ```
 
-Or push to `main` and let [the workflow](.github/workflows/deploy.yml) do it,
-with these repository secrets:
+Or add these three repository secrets and push to `main` —
+[the workflow](.github/workflows/deploy.yml) does the rest, and skips the deploy
+with a warning rather than failing while they are missing:
 
 | Secret | What it is |
 |---|---|
 | `CLOUDFLARE_API_TOKEN` | A token with *Edit Cloudflare Workers* permission |
-| `CLOUDFLARE_ACCOUNT_ID` | Your account id |
+| `CLOUDFLARE_ACCOUNT_ID` | Your account id, from the Workers dashboard |
 | `CLOUDFLARE_KV_NAMESPACE_ID` | The id printed by `wrangler kv namespace create DATA` |
+
+The same workflow publishes the standalone demo to GitHub Pages, and turns Pages
+on for the repository itself the first time it runs.
 
 ## Test
 

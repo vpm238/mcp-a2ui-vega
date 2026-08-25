@@ -17,29 +17,57 @@ jobs:
     name: Cloudflare Worker
     runs-on: ubuntu-latest
     steps:
+      # Without this the deploy fails deep inside wrangler with "kv_namespaces[0]
+      # should have a string id" — true, but not the useful sentence. Say the
+      # useful sentence, and skip rather than fail: a repository nobody has given
+      # Cloudflare credentials to is not broken, it is just not deployed yet.
+      - name: Check for Cloudflare credentials
+        id: guard
+        env:
+          API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          KV_NAMESPACE_ID: ${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}
+        run: |
+          missing=""
+          [ -n "$API_TOKEN" ]       || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$ACCOUNT_ID" ]      || missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          [ -n "$KV_NAMESPACE_ID" ] || missing="$missing CLOUDFLARE_KV_NAMESPACE_ID"
+          if [ -n "$missing" ]; then
+            echo "::warning title=Worker not deployed::Add these repository secrets to deploy:$missing"
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.guard.outputs.ready == 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.guard.outputs.ready == 'true'
         with:
           node-version: 22
           cache: npm
 
       - run: npm ci
+        if: steps.guard.outputs.ready == 'true'
 
       # The catalog document, the single-file app and the seed CSV are all
       # bundled into the Worker, so the build has to run before the deploy.
       - name: Build
+        if: steps.guard.outputs.ready == 'true'
         run: |
           npm run build -w @mcp-a2ui-vega/catalog
           npm run build:app -w @mcp-a2ui-vega/renderer
           npm run assets -w @mcp-a2ui-vega/server
 
       - name: Point at the KV namespace
+        if: steps.guard.outputs.ready == 'true'
         run: |
           cd packages/server
           sed -i "s/REPLACE_WITH_YOUR_KV_NAMESPACE_ID/${{ secrets.CLOUDFLARE_KV_NAMESPACE_ID }}/" wrangler.toml
 
       - uses: cloudflare/wrangler-action@v3
+        if: steps.guard.outputs.ready == 'true'
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -74,6 +102,11 @@ jobs:
           cp packages/catalog/dist/catalog.json packages/renderer/dist/site/catalog.json
 
       - uses: actions/configure-pages@v5
+        with:
+          # Turn Pages on for the repository rather than making that a step in
+          # the README that everyone forgets.
+          enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: packages/renderer/dist/site
