@@ -1,0 +1,14 @@
+{
+  "name": "mcp-a2ui-vega",
+  "owner": {
+    "name": "vpm238",
+    "url": "https://github.com/vpm238"
+  },
+  "plugins": [
+    {
+      "name": "a2ui-vega-dashboards",
+      "source": "./",
+      "description": "Live dashboards composed by the agent: an A2UI renderer with a Vega-Lite chart catalog, served as an MCP App. Bundles the skill and connects to your deployed Worker."
+    }
+  ]
+}

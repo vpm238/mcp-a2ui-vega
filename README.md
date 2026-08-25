@@ -23,7 +23,7 @@ dataset it keeps re-reading.
 | [`packages/renderer`](packages/renderer) | The MCP App view: React + [`@a2ui/react`](https://www.npmjs.com/package/@a2ui/react), a Vega-Lite implementation of the catalog, and the [MCP Apps](https://modelcontextprotocol.io/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp) bridge. |
 | [`packages/server`](packages/server) | A Cloudflare Worker: the MCP server, the dataset store, the saved-widget library, and the `ui://` resource. |
 | [`data`](data) | The dataset, grounded in the real Broadway weekly grosses. |
-| [`skill/a2ui-dashboards`](skill/a2ui-dashboards) | The skill that teaches an agent to compose and recompose these dashboards well. |
+| [`skills/a2ui-dashboards`](skills/a2ui-dashboards) | The skill that teaches an agent to compose and recompose these dashboards well. |
 | [`tools`](tools) | Dataset builder, live-append feed, host harness, end-to-end test. |
 
 **No API keys.** There is no model in this repo. The agent is whichever MCP host
@@ -111,10 +111,32 @@ npm run dev -w @mcp-a2ui-vega/server
 Then open <http://localhost:8788/app.html> for the dashboard on its own, or
 <http://localhost:8788/> for the connection instructions.
 
-**Install it in Claude.** Deploy (below), then add the Worker's `/mcp` URL as a
-custom connector in Claude's settings, and add the skill in
-[`skill/a2ui-dashboards`](skill/a2ui-dashboards). Ask for the ticket sales
-dashboard.
+## Install it in Claude
+
+Deploy first (below) — a custom connector is reached from Anthropic's cloud, not
+from your machine, so `localhost` will not do.
+
+**Claude Code**, straight from this repository:
+
+```
+/plugin marketplace add vpm238/mcp-a2ui-vega
+/plugin install a2ui-vega-dashboards@mcp-a2ui-vega
+```
+
+It asks for your Worker's base URL, then wires up both the MCP server and the
+skill. Nothing to download by hand.
+
+**Claude web or desktop:** Settings → Connectors → *Add custom connector*, and
+paste `https://your-worker.workers.dev/mcp`. There is no OAuth and no key. Then
+add the skill: zip the `skills/a2ui-dashboards` folder — the folder itself must
+be at the root of the zip — and upload it under Settings → Capabilities →
+Skills.
+
+The skill is optional either way: the server sends usage instructions in its MCP
+handshake. It is what makes the follow-ups good — editing one component instead
+of redrawing everything, and remembering charts you liked.
+
+Then ask for the ticket sales dashboard.
 
 ## Deploy
 
