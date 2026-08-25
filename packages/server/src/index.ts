@@ -1,7 +1,8 @@
 /**
  * The Worker.
  *
- * `/mcp` is the endpoint you give Claude. Everything under `/api` is the same
+ * `/mcp` is the endpoint you give Claude. `/events` is the change stream a view
+ * subscribes to so it does not have to poll. Everything under `/api` is the same
  * tools reached over plain HTTP, for the standalone page and for scripts like
  * `tools/append-sales.mjs` — and "the same" is literal: a REST call is turned
  * into a JSON-RPC `tools/call` against this very server, so there is no second

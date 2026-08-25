@@ -202,7 +202,9 @@ SERVER_URL=http://localhost:8790 node tools/e2e.mjs
 ```
 
 The relay exists because a browser behind a restrictive proxy may not reach
-Cloudflare while Node can; every byte still comes from the real deployment.
+Cloudflare while Node can; every byte still comes from the real deployment. It
+buffers responses, so it does not carry the change stream — a view behind it
+falls back to polling, which is worth exercising too.
 
 `tools/e2e.mjs` drives [`tools/harness.html`](tools/harness.html) — a hand-written
 MCP Apps host, ~120 lines, deliberately not sharing code with the app so a

@@ -8,6 +8,11 @@
  * Everything — the app bundle, the tool calls — is fetched from the real
  * deployment; only the hop from the browser is local. That keeps the end-to-end
  * test honest about which code is being exercised.
+ *
+ * One thing it does not carry: `/events`. Responses are buffered whole, so a
+ * stream would never flush, and a view behind this relay falls back to polling.
+ * That is the right behaviour to leave in place — it exercises the fallback —
+ * but it means push latency has to be measured against the deployment directly.
  */
 import http from 'node:http';
 
